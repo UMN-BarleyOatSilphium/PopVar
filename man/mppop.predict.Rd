@@ -6,13 +6,34 @@
 \title{Predict genetic variance and genetic correlations in multi-parent populations
 using a deterministic equation.}
 \usage{
-mppop.predict(G.in, y.in, map.in, crossing.table, parents, n.parents = 4,
-  tail.p = 0.1, self.gen = 10, DH = FALSE, model = c("rrBLUP",
-  "BayesC"), n.core = 1)
+mppop.predict(
+  G.in,
+  y.in,
+  map.in,
+  crossing.table,
+  parents,
+  n.parents = 4,
+  tail.p = 0.1,
+  self.gen = 10,
+  DH = FALSE,
+  model = c("rrBLUP", "BayesC"),
+  n.core = 1
+)
 
-mppop_predict2(M, y.in, marker.effects, map.in, crossing.table, parents,
-  n.parents = 4, tail.p = 0.1, self.gen = 10, DH = FALSE,
-  model = c("rrBLUP", "BayesC"), n.core = 1)
+mppop_predict2(
+  M,
+  y.in,
+  marker.effects,
+  map.in,
+  crossing.table,
+  parents,
+  n.parents = 4,
+  tail.p = 0.1,
+  self.gen = 10,
+  DH = FALSE,
+  model = c("rrBLUP", "BayesC"),
+  n.core = 1
+)
 }
 \arguments{
 \item{G.in}{See \code{G.in} in \code{\link[PopVar]{pop.predict}}.}

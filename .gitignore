@@ -6,3 +6,4 @@ PopVar.Rproj
 Examples/
 README.Rmd
 data-raw/
+inst/doc
