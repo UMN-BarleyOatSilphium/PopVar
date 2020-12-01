@@ -16,8 +16,9 @@ mppop.predict(
   tail.p = 0.1,
   self.gen = 10,
   DH = FALSE,
-  model = c("rrBLUP", "BayesC"),
-  n.core = 1
+  models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR"),
+  n.core = 1,
+  ...
 )
 
 mppop_predict2(
@@ -31,8 +32,9 @@ mppop_predict2(
   tail.p = 0.1,
   self.gen = 10,
   DH = FALSE,
-  model = c("rrBLUP", "BayesC"),
-  n.core = 1
+  models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR"),
+  n.core = 1,
+  ...
 )
 }
 \arguments{
@@ -58,11 +60,13 @@ recombinant inbreds. Note: \code{self.gen = 1} corresponds to an F2 population.}
 \code{self.gen}. For example, if \code{self.gen = 0} and \code{DH = TRUE}, then doubled-haploids are asssumed
 to be induced using gametes from F1 plants.}
 
-\item{model}{See \code{models} in \code{\link[PopVar]{pop.predict}}. Only 1 model is allowed.}
+\item{models}{See \code{models} in \code{\link[PopVar]{pop.predict}}.}
 
 \item{n.core}{Number of cores for parallelization. Parallelization is supported
 only on a Linux or Mac OS operating system; if working on a Windows system, the function
 is executed on a single core.}
+
+\item{...}{Additional arguments to pass depending on the choice of \code{model}.}
 
 \item{M}{A Matrix of marker genotypes of dimensions \code{nLine} x \code{nMarker}, coded as
 -1, 0, and 1.}
@@ -83,6 +87,12 @@ Predictions are based on the deterministic equations specified by Allier et al. 
 The \code{mppop.predict} function takes similarly formatted arguments as the \code{\link[PopVar]{pop.predict}} function
 in the \code{PopVar} package. For the sake of simplicity, we also include the \code{mppop_predict2} function, which
 takes arguments in a format more consistent with other genomewide prediction packages/functions.
+
+If you select a \code{model} other than "rrBLUP", you must specify the following additional arguments:
+\itemize{
+\item{\code{nIter}: See \code{\link[PopVar]{pop.predict}}}.
+\item{\code{burnIn}: See \code{\link[PopVar]{pop.predict}}}.
+}
 }
 \references{
 Allier, A., L. Moreau, A. Charcosset, S. Teyssèdre, and C. Lehermeier, 2019 Usefulness Criterion and Post-selection Parental

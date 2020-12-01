@@ -14,7 +14,8 @@ pop.predict2(
   tail.p = 0.1,
   self.gen = Inf,
   DH = FALSE,
-  model = c("rrBLUP", "BayesC")
+  models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR"),
+  ...
 )
 
 pop_predict2(
@@ -27,7 +28,8 @@ pop_predict2(
   tail.p = 0.1,
   self.gen = Inf,
   DH = FALSE,
-  model = c("rrBLUP", "BayesC")
+  models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR"),
+  ...
 )
 }
 \arguments{
@@ -50,7 +52,9 @@ recombinant inbreds. Note: \code{self.gen = 1} corresponds to an F2 population.}
 \code{self.gen}. For example, if \code{self.gen = 0} and \code{DH = TRUE}, then doubled-haploids are asssumed
 to be induced using gametes from F1 plants.}
 
-\item{model}{See \code{models} in \code{\link[PopVar]{pop.predict}}. Only 1 model is allowed.}
+\item{models}{See \code{models} in \code{\link[PopVar]{pop.predict}}.}
+
+\item{...}{Additional arguments to pass depending on the choice of \code{model}.}
 
 \item{M}{A Matrix of marker genotypes of dimensions \code{nLine} x \code{nMarker}, coded as
 -1, 0, and 1.}

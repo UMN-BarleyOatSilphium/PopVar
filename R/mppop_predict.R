@@ -21,10 +21,11 @@
 #' @param DH Indicator if doubled-haploids are to be induced after the number of selfing generations indicated by
 #' \code{self.gen}. For example, if \code{self.gen = 0} and \code{DH = TRUE}, then doubled-haploids are asssumed
 #' to be induced using gametes from F1 plants.
-#' @param model See \code{models} in \code{\link[PopVar]{pop.predict}}. Only 1 model is allowed.
+#' @param models See \code{models} in \code{\link[PopVar]{pop.predict}}.
 #' @param n.core Number of cores for parallelization. Parallelization is supported
 #' only on a Linux or Mac OS operating system; if working on a Windows system, the function
 #' is executed on a single core.
+#' @param ... Additional arguments to pass depending on the choice of \code{model}.
 #'
 #' @details
 #'
@@ -33,6 +34,12 @@
 #' The \code{mppop.predict} function takes similarly formatted arguments as the \code{\link[PopVar]{pop.predict}} function
 #' in the \code{PopVar} package. For the sake of simplicity, we also include the \code{mppop_predict2} function, which
 #' takes arguments in a format more consistent with other genomewide prediction packages/functions.
+#' 
+#' If you select a \code{model} other than "rrBLUP", you must specify the following additional arguments:
+#' \itemize{
+#'   \item{\code{nIter}: See \code{\link[PopVar]{pop.predict}}}.
+#'   \item{\code{burnIn}: See \code{\link[PopVar]{pop.predict}}}.
+#' }
 #'
 #' @references
 #'
@@ -49,7 +56,8 @@
 #' @export
 #'
 mppop.predict <- function(G.in, y.in, map.in, crossing.table, parents, n.parents = 4, tail.p = 0.1,
-                          self.gen = 10, DH = FALSE, model = c("rrBLUP", "BayesC"), n.core = 1) {
+                          self.gen = 10, DH = FALSE, models = c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR"), 
+                          n.core = 1, ...) {
 
   ###################
   # Error handling
@@ -78,7 +86,8 @@ mppop.predict <- function(G.in, y.in, map.in, crossing.table, parents, n.parents
   if (any(! markers_Gin %in% markers_mapin)) stop("The marker names in G.in are not all in map.in.")
 
   # Match arguments
-  model <- match.arg(model)
+  models <- match.arg(models)
+
 
   ###################
 
@@ -127,7 +136,7 @@ mppop.predict <- function(G.in, y.in, map.in, crossing.table, parents, n.parents
     parents <- sort(parents)
     # Create a crossing table with all possible parent combinations
     crossing.table <- as.data.frame(t(combn(x = parents, m = n.parents)), stringsAsFactors = FALSE)
-    names(crossing.table) <- c("parent1", "parent2")
+    names(crossing.table) <- paste0("parent", seq_len(n.parents))
 
   }
 
@@ -169,7 +178,8 @@ mppop.predict <- function(G.in, y.in, map.in, crossing.table, parents, n.parents
 
   ## Pass arguments to mppop_predict2
   cross_predictions2 <- mppop_predict2(M = M, y.in = y.in_use, map.in = map.in_use, crossing.table = crossing.table,
-                                       self.gen = self.gen, tail.p = tail.p, DH = DH, model = model, n.core = n.core)
+                                       self.gen = self.gen, tail.p = tail.p, DH = DH, models = models, n.core = n.core, 
+                                       ... = ...)
 
   ## Return the predictions
   return(cross_predictions2)
@@ -200,7 +210,8 @@ mppop.predict <- function(G.in, y.in, map.in, crossing.table, parents, n.parents
 #' @export
 #'
 mppop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, parents, n.parents = 4, tail.p = 0.1,
-                           self.gen = 10, DH = FALSE, model = c("rrBLUP", "BayesC"), n.core = 1) {
+                           self.gen = 10, DH = FALSE, models = c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR"), 
+                           n.core = 1, ...) {
 
   ###################
   # Error handling
@@ -210,8 +221,7 @@ mppop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, pare
   stopifnot(is.data.frame(map.in))
 
   # Check the number of markers in the map and the G.in objects
-  if (ncol(M) != nrow(map.in))
-    stop("The number of markers in G.in does not match the markers in map.in")
+  if (ncol(M) != nrow(map.in)) stop("The number of markers in G.in does not match the markers in map.in")
 
   ## Make sure there is no missing marker data
   if (any(is.na(M))) stop ("There must be no missing marker data.")
@@ -260,7 +270,7 @@ mppop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, pare
 
     # Create a crossing table with all possible parent combinations
     crossing.table <- as.data.frame(t(combn(x = parents, m = n.parents)), stringsAsFactors = FALSE)
-    names(crossing.table) <- c("parent1", "parent2")
+    names(crossing.table) <- paste0("parent", seq_len(n.parents))
 
   }
 
@@ -318,7 +328,10 @@ mppop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, pare
 
 
   # Match arguments
-  model <- match.arg(model)
+  models <- match.arg(models)
+  
+  # Capture other arguments
+  other.args <- list(...)
 
 
   ###################
@@ -355,45 +368,27 @@ mppop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, pare
   ## If self.gen is Inf and DH is T, error
   if (is.infinite(self.gen) & DH) stop("Infinite selfing generations and doubled-haploid production cannot both occur.")
 
+  # Reorder markers
+  M1 <- M[geno_lines, markers_mapin, drop = FALSE]
 
   ## Fit models to calculate marker effects, if necessary
   if (calc_marker_eff) {
 
     ## Create a model.frame from the phenotypes; extract the column name of genotypes/lines
     geno_colname <- colnames(y.in_use)[1]
+    
+    # Calculate marker effects
+    marker_effect_out <- do.call("calc_marker_effects", 
+                                 c(M = quote(M1), y.df = quote(y.in_use[-1]), models = models, 
+                                   other.args[names(other.args) %in% formalArgs("calc_marker_effects")]))
 
-    # Subset using factors in y.in
-    M1 <- M[geno_lines, markers_mapin, drop = FALSE]
+    ## Create a complete matrix of marker effects for each trait
+    mar_eff_mat <- do.call("cbind", lapply(marker_effect_out, "[[", "effects"))
+    mar_eff_mat <- structure(mar_eff_mat, dimnames = list(row.names(mar_eff_mat), names(marker_effect_out)))
+    
+    mar_beta_mat <- do.call("cbind", lapply(marker_effect_out, "[[", "grand_mean"))
+    mar_beta_mat <- structure(mar_beta_mat, dimnames = list(row.names(mar_beta_mat), names(marker_effect_out)))
 
-    ## Calculate marker effects for each trait
-    if (model == "rrBLUP") {
-
-      ## Apply a function over each trait
-      marker_effect_out <- lapply(X = y.in_use[-1], FUN = function(y) {
-
-        ## Solve the mixed model
-        fit <- mixed.solve(y = y, Z = M1, method = "REML")
-
-        # Return marker effects and the grand mean
-        list(effects = as.matrix(fit$u), grand_mean = fit$beta)
-
-      })
-
-
-      ## Create a complete matrix of marker effects for each trait
-      mar_eff_mat <- do.call("cbind", lapply(marker_effect_out, "[[", "effects"))
-      mar_eff_mat <- structure(mar_eff_mat, dimnames = list(row.names(mar_eff_mat), names(marker_effect_out)))
-
-      mar_beta_mat <- do.call("cbind", lapply(marker_effect_out, "[[", "grand_mean"))
-      mar_beta_mat <- structure(mar_beta_mat, dimnames = list(row.names(mar_beta_mat), names(marker_effect_out)))
-
-
-    } else if (model == "BayesC") {
-      stop("Other models not supported.")
-
-    } else {
-      stop("Other models not supported.")
-    }
 
     # Else create a matrix of marker ordered marker effects
   } else {
@@ -409,8 +404,7 @@ mppop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, pare
 
   }
 
-  # Reorder markers
-  M1 <- M[geno_lines, markers_mapin, drop = FALSE]
+
 
   ## Create an empty matrix
   marker_names <- markers_mapin

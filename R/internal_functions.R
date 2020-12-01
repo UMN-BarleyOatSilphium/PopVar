@@ -473,6 +473,48 @@ Xval <- function(model, y.CV, X.CV, G.CV){
 
 
 
+# Function to calculate marker effects
+# 
+# Allows other arguments to be passed
+# 
+calc_marker_effects <- function(M, y.df, models = c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR"), nIter, burnIn) {
+  
+  models <- match.arg(models)
+  
+  # Error out if model != rrBLUP and nIter & burnIn are missing
+  if (models != "rrBLUP") {
+    if (missing(nIter) | missing(burnIn)) stop ("You must provide the arguments 'nIter' and 'burnIn' for that model choice.")
+    
+  }
+  
+  # Determine the function to use for marker effect estimation
+  if (models == "rrBLUP") {
+    cme <- function(M, y) {
+      fit <- mixed.solve(y = y, Z = M, method = "REML")
+      # Return marker effects and the grand mean
+      list(effects = as.matrix(fit$u), grand_mean = fit$beta)
+    }
+  } else {
+    cme <- function(M, y) {
+      suppressWarnings(fit <- BGLR(y = y, ETA = list(list(X = M, model = models)), verbose = FALSE, nIter = nIter, burnIn = burnIn))
+      list(effects = as.matrix(fit$ETA[[1]]$b), grand_mean = fit$mu)
+    }
+  }
+    
+  ## Calculate marker effects for each trait
+  me_out <- lapply(X = y.df, FUN = cme, M = M)
+  
+  # Clean up files if models != rrBLUP
+  if (models != "rrBLUP") {
+    invisible(file.remove(list.files(path = ".", pattern = paste0("mu|varE|", models), full.names = TRUE)))
+  }
+ 
+  # Return me_out
+  return(me_out)
+   
+}
+
+
 
 
 

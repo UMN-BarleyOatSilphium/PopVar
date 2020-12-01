@@ -186,7 +186,7 @@ Below is an example of using the `mppop.predict` function:
 sample_parents <- sample(unique(unlist(cross.tab_ex)), 10)
 
 mp_out <- mppop.predict(G.in = G.in_ex_imputed, y.in = y.in_ex, map.in = map.in_ex,
-                        parents = sample_parents, n.parents = 4, model = "rrBLUP")
+                        parents = sample_parents, n.parents = 4, models = "rrBLUP")
 
 knitr::kable(head(subset(mp_out, trait == "Yield")))
 
@@ -199,7 +199,7 @@ Below is an example of using the `mppop.predict` function:
 ```{r mp.example2}
 # Generate predictions for all possible 4-way crosses of 10 sample parents
 mp_out2 <- mppop_predict2(M = G.in_ex_mat, y.in = y.in_ex, map.in = map.in_ex,
-                          parents = sample_parents, n.parents = 4, model = "rrBLUP")
+                          parents = sample_parents, n.parents = 4, models = "rrBLUP")
 
 knitr::kable(head(subset(mp_out2, trait == "Yield")))
 

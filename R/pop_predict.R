@@ -396,7 +396,8 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL, 
 #' @param DH Indicator if doubled-haploids are to be induced after the number of selfing generations indicated by
 #' \code{self.gen}. For example, if \code{self.gen = 0} and \code{DH = TRUE}, then doubled-haploids are asssumed
 #' to be induced using gametes from F1 plants.
-#' @param model See \code{models} in \code{\link[PopVar]{pop.predict}}. Only 1 model is allowed.
+#' @param models See \code{models} in \code{\link[PopVar]{pop.predict}}.
+#' @param ... Additional arguments to pass depending on the choice of \code{model}.
 #'
 #' @details
 #'
@@ -450,7 +451,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL, 
 #' @export
 #'
 pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0.1, self.gen = Inf, DH = FALSE,
-                         model = c("rrBLUP", "BayesC")) {
+                         models = c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR"), ...) {
   
   
   ## Check classes
@@ -489,8 +490,7 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
   markers_mapin <- as.character(map.in_use[[1]])
   
   # Match arguments
-  model <- match.arg(model)
-  
+  models <- match.arg(models)
   
   ## Subset G.in for markers in map.in_use
   G.in_use <- G.in[, c(1, which(markers_Gin %in% markers_mapin) + 1), drop = FALSE]
@@ -544,7 +544,7 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
   ## Pass data to pop_predict2 ##
   cross_predictions2 <- pop_predict2(M = M, y.in = y.in_use, map.in = map.in_use,
                                      crossing.table = crossing.table, tail.p = tail.p, self.gen = self.gen,
-                                     DH = DH, model = model)
+                                     DH = DH, model = model, ... = ...)
   
   
   ## Return the predictions
@@ -595,7 +595,8 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
 #' @export
 #'
 pop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, parents, tail.p = 0.1,
-                         self.gen = Inf, DH = FALSE, model = c("rrBLUP", "BayesC")) {
+                         self.gen = Inf, DH = FALSE, models = c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR"),
+                         ...) {
   
   
   ###################
@@ -693,10 +694,13 @@ pop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, parent
   }
   
   # Match arguments
-  model <- match.arg(model)
+  models <- match.arg(models)
+  
+  # Capture additional arguments
+  other.args <- list(...)
   
   
-  ####################33
+  ####################
   
   
   # Reorder map based on chrom and then pos
@@ -708,6 +712,8 @@ pop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, parent
   
   if (!all(parents %in% row.names(M))) stop("Parents are not in G.in.")
   
+  # Reorder markers
+  M1 <- M[geno_lines, markers_mapin, drop = FALSE]
   
   ## Fit models to calculate marker effects, if necessary
   if (calc_marker_eff) {
@@ -715,38 +721,18 @@ pop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, parent
     ## Create a model.frame from the phenotypes; extract the column name of genotypes/lines
     geno_colname <- colnames(y.in_use)[1]
     
-    # Subset using factors in y.in
-    M1 <- M[geno_lines, markers_mapin, drop = FALSE]
+    # Calculate marker effects
+    marker_effect_out <- do.call("calc_marker_effects", 
+                                 c(M = quote(M1), y.df = quote(y.in_use[-1]), models = models, 
+                                   other.args[names(other.args) %in% formalArgs("calc_marker_effects")]))
     
-    ## Calculate marker effects for each trait
-    if (model == "rrBLUP") {
-      
-      ## Apply a function over each trait
-      marker_effect_out <- lapply(X = y.in_use[-1], FUN = function(y) {
-        
-        ## Solve the mixed model
-        fit <- mixed.solve(y = y, Z = M1, method = "REML")
-        
-        # Return marker effects and the grand mean
-        list(effects = as.matrix(fit$u), grand_mean = fit$beta)
-        
-      })
-      
-      
-      ## Create a complete matrix of marker effects for each trait
-      mar_eff_mat <- do.call("cbind", lapply(marker_effect_out, "[[", "effects"))
-      mar_eff_mat <- structure(mar_eff_mat, dimnames = list(row.names(mar_eff_mat), names(marker_effect_out)))
-      
-      mar_beta_mat <- do.call("cbind", lapply(marker_effect_out, "[[", "grand_mean"))
-      mar_beta_mat <- structure(mar_beta_mat, dimnames = list(row.names(mar_beta_mat), names(marker_effect_out)))
-      
-      
-    } else if (model == "BayesC") {
-      stop("Other models not supported.")
-      
-    } else {
-      stop("Other models not supported.")
-    }
+    ## Create a complete matrix of marker effects for each trait
+    mar_eff_mat <- do.call("cbind", lapply(marker_effect_out, "[[", "effects"))
+    mar_eff_mat <- structure(mar_eff_mat, dimnames = list(row.names(mar_eff_mat), names(marker_effect_out)))
+    
+    mar_beta_mat <- do.call("cbind", lapply(marker_effect_out, "[[", "grand_mean"))
+    mar_beta_mat <- structure(mar_beta_mat, dimnames = list(row.names(mar_beta_mat), names(marker_effect_out)))
+    
     
     # Else create a matrix of marker ordered marker effects
   } else {
@@ -762,8 +748,6 @@ pop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, parent
     
   }
   
-  # Reorder markers
-  M1 <- M[geno_lines, markers_mapin, drop = FALSE]
   
   ## Create an empty matrix
   marker_names <- markers_mapin
@@ -966,7 +950,8 @@ pop_predict2 <- function(M, y.in, marker.effects, map.in, crossing.table, parent
     
     ## Save the results as a data.frame
     cross_predictions[[j]] <- data.frame(parent1 = pars[1], parent2 = pars[2], trait = trait_names,
-                                         cbind(pred_mu = pred_mu_j, pred_varG = pred_varG_j, pred_corG_mat, pred_cor_musp_low, pred_cor_musp_high),
+                                         cbind(pred_mu = pred_mu_j, pred_varG = pred_varG_j, pred_corG_mat, pred_cor_musp_low, 
+                                               pred_cor_musp_high),
                                          stringsAsFactors = FALSE, row.names = NULL)
     
   } # End loop
