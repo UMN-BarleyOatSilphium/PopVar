@@ -7,7 +7,8 @@
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/PopVar)](https://cran.r-project.org/package=PopVar)
-
+[![Travis build
+status](https://travis-ci.org/UMN-BarleyOatSilphium/PopVar.svg?branch=master)](https://travis-ci.org/UMN-BarleyOatSilphium/PopVar)
 <!-- badges: end -->
 
 ## Introduction
