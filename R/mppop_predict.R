@@ -185,7 +185,7 @@ mppop.predict <- function(G.in, y.in, map.in, crossing.table, parents, n.parents
 #' Predict genetic variance and genetic correlations in multi-parent populations
 #' using a deterministic model
 #'
-#' @describeIn mppop.predict
+#' @rdname mppop.predict
 #'
 #' @param M A Matrix of marker genotypes of dimensions \code{nLine} x \code{nMarker}, coded as
 #' -1, 0, and 1.

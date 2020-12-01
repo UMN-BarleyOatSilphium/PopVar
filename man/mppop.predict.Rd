@@ -84,11 +84,6 @@ The \code{mppop.predict} function takes similarly formatted arguments as the \co
 in the \code{PopVar} package. For the sake of simplicity, we also include the \code{mppop_predict2} function, which
 takes arguments in a format more consistent with other genomewide prediction packages/functions.
 }
-\section{Functions}{
-\itemize{
-\item \code{mppop_predict2}: 
-}}
-
 \references{
 Allier, A., L. Moreau, A. Charcosset, S. Teyssèdre, and C. Lehermeier, 2019 Usefulness Criterion and Post-selection Parental
 Contributions in Multi-parental Crosses: Application to Polygenic Trait Introgression. G3 (Bethesda) 9: 1469–1479.
