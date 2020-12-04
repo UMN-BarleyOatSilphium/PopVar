@@ -544,7 +544,7 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
   ## Pass data to pop_predict2 ##
   cross_predictions2 <- pop_predict2(M = M, y.in = y.in_use, map.in = map.in_use,
                                      crossing.table = crossing.table, tail.p = tail.p, self.gen = self.gen,
-                                     DH = DH, model = model, ... = ...)
+                                     DH = DH, models = models, ... = ...)
   
   
   ## Return the predictions

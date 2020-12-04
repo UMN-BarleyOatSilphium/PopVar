@@ -110,7 +110,7 @@ Below is an example of using the `pop.predict2` function:
 
 ```{r example2}
 out2 <- pop.predict2(G.in = G.in_ex_imputed, y.in = y.in_ex, map.in = map.in_ex,
-                     crossing.table = cross.tab_ex, model = "rrBLUP")
+                     crossing.table = cross.tab_ex, models = "rrBLUP")
 
 knitr::kable(head(subset(out2, trait == "Yield")))
 
@@ -122,7 +122,7 @@ The formatting requirements of `G.in` for `pop.predict` and `pop.predict2` are a
 
 ```{r example3}
 out3 <- pop_predict2(M = G.in_ex_mat, y.in = y.in_ex, map.in = map.in_ex,
-                     crossing.table = cross.tab_ex, model = "rrBLUP")
+                     crossing.table = cross.tab_ex, models = "rrBLUP")
 
 knitr::kable(head(subset(out2, trait == "Yield")))
 
@@ -193,7 +193,7 @@ knitr::kable(head(subset(mp_out, trait == "Yield")))
 ```
 
 
-Below is an example of using the `mppop.predict` function:
+Below is an example of using the `mppop_predict2` function:
 
 
 ```{r mp.example2}
