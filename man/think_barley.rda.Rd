@@ -4,6 +4,8 @@
 \name{think_barley.rda}
 \alias{think_barley.rda}
 \alias{G.in_ex}
+\alias{G.in_ex_mat}
+\alias{G.in_ex_imputed}
 \alias{y.in_ex}
 \alias{map.in_ex}
 \alias{cross.tab_ex}
@@ -12,6 +14,8 @@
 The names of the example files are:
 \describe{
 \item{G.in_ex}{A set of 245 barley lines genotyped with 742 SNP markers}
+\item{G.in_ex_mat}{A n x p matrix of n = 245 barley lines genotyped with p = 742 SNP markers}
+\item{G.in_ex_imputed}{A n x p matrix of n = 245 barley lines and p = 742 \emph{imputed} SNP marker genotypes}
 \item{y.in_ex}{Phenotypes of four traits for a portion of the 245 barley lines, Fusarium head blight (FHB), deoxynivalenol (DON) in ppm, grain yield in bushels/acre, and plant height in cm.}
 \item{map.in_ex}{Genetic map (i.e. chromosome assignment and genetic distance (cM) between markers) of the 742 SNP markers based on \cite{Munoz-Amatriain et al., 2011}}
 \item{cross.tab_ex}{A table of user-defined crosses}

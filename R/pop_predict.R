@@ -384,6 +384,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL, 
 #' Predict genetic variance and genetic correlations in bi-parental populations using a deterministic model
 #'
 #' @description
+#' Generates predictions of the genetic variance and genetic correlation in bi-parental populations using a set of deterministic equations instead of simulations.
 #'
 #' @param G.in See \code{G.in} in \code{\link[PopVar]{pop.predict}}.
 #' @param y.in See \code{y.in} in \code{\link[PopVar]{pop.predict}}.

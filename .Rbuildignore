@@ -4,3 +4,4 @@
 ^README\.Rmd$
 ^Examples$
 ^\.travis\.yml$
+^data-raw$

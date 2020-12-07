@@ -63,7 +63,7 @@ to be induced using gametes from F1 plants.}
 subsequent columns should include the marker effects. Supercedes \code{y.in} if passed.}
 }
 \description{
-
+Generates predictions of the genetic variance and genetic correlation in bi-parental populations using a set of deterministic equations instead of simulations.
 }
 \details{
 Predictions are based on the deterministic equations specified by Zhong and Jannink (2007), Allier et al. (2019),

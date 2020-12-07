@@ -447,67 +447,6 @@ XValidate.Ind <- function(y.CV=NULL, G.CV=NULL, models.CV=NULL, nFold.CV=NULL, n
 
 
 
-## G.CV must be an n x m (marker) matrix
-## y.CV must be a numeric vector representing a continuous variable
-
-
-#y.CV = y_TP
-#X.CV = X_TP
-#G.CV = G_TP
-#nFold.reps= 5
-#model = "RR"
-#CV.iter = 5000
-#CV.burn = 1000
-##
-
-
-Xval <- function(model, y.CV, X.CV, G.CV){
-  
-  if(model == "BA"){iv = TRUE; pi = 0; de=FALSE}
-  if(model == "BB"){iv = TRUE; pi = .95; de=FALSE}
-  if(model == "BC"){iv = FALSE; pi = .95; de=FALSE}
-  if(model == "BL"){iv = TRUE; pi = 0; de=TRUE}
-  accL <- list()
-  
-  if(length(models) > 1){
-    for(n in 1:nFold.reps){
-      acc <- c()
-      for(i in 1:nFolds){
-        y_train <- y.CV[sets.train[[n]][[i]]]
-        y_pred <- y.CV[sets.pred[[n]][[i]]]
-        
-        X_train <- X.CV[sets.train[[n]][[i]],]
-        X_pred <- X.CV[sets.pred[[n]][[i]],]
-        
-        G_train <- G.CV[sets.train[[n]][[i]],]
-        G_pred <- G.CV[sets.pred[[n]][[i]],]
-        
-        if(model %in% c("RR", "dnRR")){
-          RRB.out <- rrBLUP::mixed.solve(y_train, X = X_train, Z = G_train)
-          b <- RRB.out$beta; u <- RRB.out$u
-          acc <- c(acc, cor(G_pred %*% u + as.matrix(X_pred) %*% b, y_pred))
-        } else{
-          bWGR.out <- bWGR::wgr(y = y_train, X = G_train, iv = iv, pi = pi, de = de, it = CV.iter, bi = CV.burn, verb = verbose)
-          u <- bWGR.out$b
-          acc <- c(acc, cor(G_pred %*% u , y_pred))
-        }
-      }
-      accL[[n]] <- acc
-    }  
-  } else accL <- "CV not performed per user choice"
-  
-  ## Estimate mkr effs using full TP
-  if(model %in% c("RR", "dnRR")){
-    RRB.out <- rrBLUP::mixed.solve(y.CV, X = X.CV, Z = G.CV)
-    b <- RRB.out$beta; u <- RRB.out$u
-  } else{
-    bWGR.out <- bWGR::wgr(y = y_train, X = G_train, iv = iv, pi = pi, de = de, it = CV.iter, bi = CV.burn, verb = verbose)
-    u <- bWGR.out$b; b <- bWGR.out$mu
-  }
-  
-  return(list(r = accL, u = u, b = b))
-}
-
 
 
 # Function to calculate marker effects
