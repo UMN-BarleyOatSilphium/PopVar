@@ -107,7 +107,7 @@ plot(pred_varG ~ self.gen, data = dat, type = "b",
 data("think_barley")
 
 # Use example data to make predictions
-out <- pop.predict2(M = G.in_ex_mat, y.in = y.in_ex, map.in = map.in_ex, 
+out <- pop_predict2(M = G.in_ex_mat, y.in = y.in_ex, map.in = map.in_ex, 
                     crossing.table = cross.tab_ex)
                     
 # Provide a vector of parents to predict all possible crosses (some parents

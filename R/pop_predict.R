@@ -569,7 +569,7 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
 #' data("think_barley")
 #' 
 #' # Use example data to make predictions
-#' out <- pop.predict2(M = G.in_ex_mat, y.in = y.in_ex, map.in = map.in_ex, 
+#' out <- pop_predict2(M = G.in_ex_mat, y.in = y.in_ex, map.in = map.in_ex, 
 #'                     crossing.table = cross.tab_ex)
 #'                     
 #' # Provide a vector of parents to predict all possible crosses (some parents
