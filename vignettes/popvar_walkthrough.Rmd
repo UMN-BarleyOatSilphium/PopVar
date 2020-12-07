@@ -1,8 +1,6 @@
 ---
 title: "Using `PopVar`"
 output: rmarkdown::html_vignette
-bibliography: C:/GoogleDrive/Literature/MendeleyLibrary/library.bib
-biblio-style: C:/GoogleDrive/Literature/BibliographyStyles/trisocieties
 vignette: >
   %\VignetteIndexEntry{Using `PopVar`}
   %\VignetteEngine{knitr::rmarkdown}
@@ -11,6 +9,7 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  # eval = FALSE,
   collapse = TRUE,
   comment = "#>"
 )
@@ -19,13 +18,13 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-To make progress in breeding, populations should have a favorable mean and high genetic variance [@Bernardo2010]. These two parameters can be combined into a single measure called the usefulness criterion [@Schnell1975], visualized in Figure 1.
+To make progress in breeding, populations should have a favorable mean and high genetic variance (Bernardo 2010). These two parameters can be combined into a single measure called the usefulness criterion (Schnell and Utz 1975), visualized in Figure 1.
 
 ![Figure 1. Visualization of the mean, genetic variance, and superior progeny mean of a single population.](figures/figure1.png)
 
 
 
-Ideally, breeders would identify the set of parent combinations that, when realized in a cross, would give rise to populations meeting these requirements. `PopVar` is a package that uses phenotypic and genomewide marker data on a set of candidate parents to predict the mean, genetic variance, and superior progeny mean in bi-parental or multi-parental populations. Thre package also contains functionality for performing cross-validation to determine the suitability of different statistical models. More details are available in @Mohammadi2015. A dataset `think_barley` is included for reference and examples.
+Ideally, breeders would identify the set of parent combinations that, when realized in a cross, would give rise to populations meeting these requirements. `PopVar` is a package that uses phenotypic and genomewide marker data on a set of candidate parents to predict the mean, genetic variance, and superior progeny mean in bi-parental or multi-parental populations. Thre package also contains functionality for performing cross-validation to determine the suitability of different statistical models. More details are available in Mohammadi, Tiede, and Smith (2015). A dataset `think_barley` is included for reference and examples.
 
 
 
@@ -51,7 +50,7 @@ devtools::install_github("UMN-BarleyOatSilphium/PopVar")
 Below is a description of the functions provided in `PopVar`:
 
 | Function        | Description                     |
-|-----------------|:-------------------------------:|
+|:-----------------|:--------------------------------|
 | `pop.predict` | Uses simulations to make predictions in recombinant inbred line populations; can internally perform cross-validation for model selections; can be quite slow. |
 | `pop.predict2` | Uses deterministic equations to make predictions in populations of complete or partial selfing and with or without the induction of doubled haploids; is much faster than `pop.predict`; does not perform cross-validation or model selection internally. |
 | `pop_predict2` | Has the same functionality as `pop.predict2`, but accepts genomewide marker data in a simpler matrix format. |
@@ -64,7 +63,7 @@ Below is a description of the functions provided in `PopVar`:
 
 Below are some example uses of the functions in `PopVar`:
 
-```{r example}
+```{r example, eval = TRUE}
 # Load the package
 library(PopVar)
 
@@ -211,4 +210,15 @@ knitr::kable(head(subset(mp_out2, trait == "Yield")))
 
 
 # References
+
+
+Bernardo, Rex. 2010. Breeding for Quantitative Traits in Plants. 2nd ed. Woodbury, Minnesota: Stemma Press.
+
+Mohammadi, Mohsen, Tyler Tiede, and Kevin P. Smith. 2015. “PopVar: A Genome-Wide Procedure for Predicting Genetic Variance and Correlated Response in Biparental Breeding Populations.” Crop Science 55 (5): 2068–77. https://doi.org/10.2135/cropsci2015.01.0030.
+
+Schnell, F. W., and H. F. Utz. 1975. “F1-leistung und elternwahl euphyder züchtung von selbstbefruchtern.” In Bericht über Die Arbeitstagung Der Vereinigung Österreichischer Pflanzenzüchter, 243–48. Gumpenstein, Austria: BAL Gumpenstein.
+
+
+
+
 
