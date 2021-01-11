@@ -4,12 +4,12 @@ Version: 1.3.0
 Authors@R: 
     c(person(given = "Tyler",
            family = "Tiede",
-           role = c("aut", "cre"),
+           role = c("aut"),
            email = "tyler.tiede7@gmail.com",
            comment = c(ORCID = "YOUR-ORCID-ID")),
       person(given = "Jeffrey",
              family = "Neyhart",
-             role = c("aut", "ctb"),
+             role = c("aut", "ctb", "cre"),
              email = "neyhartje@gmail.com",
              comment = c(ORCID = "0000-0002-1991-5310")),
       person(given = "Mohsen",
@@ -24,7 +24,7 @@ Description: The main attribute of 'PopVar' is the prediction of genetic varianc
     from which the package derives its name. 'PopVar' contains a set of functions that use phenotypic and genotypic
     data from a set of candidate parents to 1) predict the mean, genetic variance, and superior progeny value of all, 
     or a defined set of pairwise bi-parental crosses, and 2) perform cross-validation to estimate genome-wide prediction 
-    accuracy of multiple statistical models. More details are available in Mohammadi, Tiede, and Smith (2015, doi:10.2135/cropsci2015.01.0030). 
+    accuracy of multiple statistical models. More details are available in Mohammadi, Tiede, and Smith (2015, <doi:10.2135/cropsci2015.01.0030>). 
     A dataset 'think_barley.rda' is included for reference and examples.
 License: GPL-3
 Encoding: UTF-8
