@@ -5,3 +5,5 @@
 ^Examples$
 ^\.travis\.yml$
 ^data-raw$
+^cran-comments\.md$
+^revdep$

@@ -76,6 +76,8 @@ and Neyhart et al. (2019).
 
 \examples{
 
+\dontrun{
+
 # Load data
 data("think_barley")
 
@@ -86,7 +88,7 @@ out <- pop.predict2(G.in = G.in_ex_imputed, y.in = y.in_ex, map.in = map.in_ex,
 # Provide a vector of parents to predict all possible crosses (some parents
 # have missing phenotypic data)
 out <- pop.predict2(G.in = G.in_ex_imputed, y.in = y.in_ex, map.in = map.in_ex, 
-                    parents = y.in_ex$Entry[1:10])
+                    parents = y.in_ex$Entry[1:5])
                     
 # Make predictions for 5 crosses with various levels of inbreeding
 out_list <- lapply(X = 1:10, FUN = function(self.gen) {
@@ -100,7 +102,7 @@ dat <- do.call("rbind", lapply(out_list, subset, trait == "Yield"))
 plot(pred_varG ~ self.gen, data = dat, type = "b", 
      subset = parent1 == parent1[1] & parent2 == parent2[1])
 
-
+}
 
 
 # Load data

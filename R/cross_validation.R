@@ -73,7 +73,7 @@ x.val <- function(G.in=NULL, y.in=NULL, min.maf=0.01, mkr.cutoff=0.50, entry.cut
   
   ### ### Filter markers first for missing data and MAF
   mkrs.to.remove <- c()
-  if(min.maf > 0){maf.list <- apply(G.mat, 2, maf.filt); mkrs.to.remove <- c(mkrs.to.remove, which(maf.list < min.maf))}
+  if(min.maf > 0){maf.list <- apply(G.mat, 2, maf_filt); mkrs.to.remove <- c(mkrs.to.remove, which(maf.list < min.maf))}
   if(mkr.cutoff <1){mkrNA.list <- apply(G.mat, 2, function(M){return(length(which(is.na(M))) / length(M))})
                     mkrs.to.remove <- unique(c(mkrs.to.remove, which(mkrNA.list > mkr.cutoff)))}
   
@@ -120,8 +120,8 @@ x.val <- function(G.in=NULL, y.in=NULL, min.maf=0.01, mkr.cutoff=0.50, entry.cut
     cat("\n")
     cat(paste("\nPerforming cross validation for ", trait, sep=""))
     
-    if(is.null(nFold)) junk <- capture.output(xval.out <- XValidate.nonInd(y.CV = y_TP, G.CV = G_TP, models.CV = models, frac.train.CV=frac.train, nCV.iter.CV=nCV.iter, burnIn.CV = CV.burnIn, nIter.CV = CV.nIter)$CV.summary)
-    if(!is.null(nFold)) junk <- capture.output(xval.out <- XValidate.Ind(y.CV = y_TP, G.CV = G_TP, models.CV = models, nFold.CV = nFold, nFold.CV.reps = nFold.reps, burnIn.CV = CV.burnIn, nIter.CV = CV.nIter)$CV.summary)
+    if(is.null(nFold)) junk <- capture.output(xval.out <- XValidate_nonInd(y.CV = y_TP, G.CV = G_TP, models.CV = models, frac.train.CV=frac.train, nCV.iter.CV=nCV.iter, burnIn.CV = CV.burnIn, nIter.CV = CV.nIter)$CV.summary)
+    if(!is.null(nFold)) junk <- capture.output(xval.out <- XValidate_Ind(y.CV = y_TP, G.CV = G_TP, models.CV = models, nFold.CV = nFold, nFold.CV.reps = nFold.reps, burnIn.CV = CV.burnIn, nIter.CV = CV.nIter)$CV.summary)
     
     if(t == 1){
       CV.results <- list()

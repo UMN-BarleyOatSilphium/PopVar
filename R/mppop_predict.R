@@ -52,6 +52,7 @@
 #' @importFrom qtl mf.h
 #' @importFrom rrBLUP mixed.solve
 #' @importFrom parallel mclapply
+#' @importFrom utils combn
 #'
 #' @export
 #'
@@ -206,6 +207,8 @@ mppop.predict <- function(G.in, y.in, map.in, crossing.table, parents, n.parents
 #' @importFrom qtl mf.h
 #' @importFrom rrBLUP mixed.solve
 #' @importFrom parallel mclapply
+#' @importFrom methods formalArgs
+#' @importFrom stats dnorm qnorm as.dist dist
 #'
 #' @export
 #'

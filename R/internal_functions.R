@@ -1,7 +1,38 @@
-## Group of functions that PopVar uses internally
+#' Internal functions
+#' 
+#' @name internal
+#' 
+#' @description 
+#' Internal functions generally not to be called by the user.
+#' 
+#' @param crossing.table The crossing table.
+#' @param par.entries The parent entries.
+#' @param crossing.mat The crossing matrix.
+#' @param GEBVs The genomic estimated breeding values.
+#' @param tail.p The proportion from the population to select.
+#' @param G The marker genotypes
+#' @param y.CV The phenotypes for cross-validation.
+#' @param G.CV The marker genotypes for cross-validation.
+#' @param models.CV The models for cross-validation.
+#' @param frac.train.CV The fraction of data to use as training data in cross-validation.
+#' @param nCV.iter.CV The number of iterations of cross-validation.
+#' @param burnIn.CV The burn-in number for cross-validation.
+#' @param nIter.CV The number of iterations for Bayesian models in cross-validation.
+#' @param nFold.CV The number of folds in k-fold cross-validation.
+#' @param nFold.CV.reps The number of replications of k-fold cross-validation.
+#' @param M The marker matrix.
+#' @param y.df The phenotype data.
+#' @param models The models to use.
+#' @param nIter The number of iterations.
+#' @param burnIn The burn-in rate.
+#' 
+#' @importFrom stats cor sd
+#' 
 
-
-par.position <- function(crossing.table, par.entries){ # Used when a crossing table is defined
+#' 
+#' @rdname internal
+#' 
+par_position <- function(crossing.table, par.entries) { # Used when a crossing table is defined
   
   par.pos <- matrix(nrow = nrow(crossing.table), ncol = 2)
   crosses.possible <- matrix(nrow = nrow(crossing.table), ncol = 2)
@@ -29,7 +60,10 @@ par.position <- function(crossing.table, par.entries){ # Used when a crossing ta
   return(list(parent.positions=par.pos, crosses.possible=crosses.possible))
 }
 
-par.name <- function(crossing.mat, par.entries){ ## Used when all combinations of parents are crossed
+#'
+#' @rdname internal
+#' 
+par_name <- function(crossing.mat, par.entries){ ## Used when all combinations of parents are crossed
   crosses.possible <- matrix(nrow = nrow(crossing.mat), ncol = 2)
   for(i in 1:nrow(crossing.mat)){
     crosses.possible[i,1] <- par.entries[crossing.mat[i,1]]
@@ -38,7 +72,9 @@ par.name <- function(crossing.mat, par.entries){ ## Used when all combinations o
   return(crosses.possible)
 }
 
-
+#'
+#' @rdname internal
+#' 
 tails <- function(GEBVs, tail.p){ #Calculates means of tails; set tail.p to the proportion of the populaiton you want to take the mean of, default is 10%
   u.top <- mean(GEBVs[which(GEBVs >= quantile(GEBVs, 1-tail.p))], na.rm=T)
   u.bot <- mean(GEBVs[which(GEBVs <= quantile(GEBVs, tail.p))], na.rm=T)
@@ -46,37 +82,18 @@ tails <- function(GEBVs, tail.p){ #Calculates means of tails; set tail.p to the 
   return(rbind(u.top, u.bot))
 }
 
-maf.filt <- function(G){
+#'
+#' @rdname internal
+#' 
+maf_filt <- function(G){
   G_noNA <- sum(!is.na(G), na.rm = TRUE)
   freq1 <- sum(G == 1, na.rm = TRUE) / G_noNA #+ .5*(sum(G == 0, na.rm = TRUE) / G_noNA)
   min(freq1, 1 - freq1)
 }
 
-cor.filt <- function(G, cor.cutoff){
-  G4cor <- t(G)
-  G4cor[which(is.na(G4cor))] <- 0
-  G.cor <- cor(G4cor)
-  G.cor[lower.tri(G.cor, diag = TRUE)] <- NA
-  dup.mat <- which(G.cor > cor.cutoff, arr.ind = TRUE)
-  dup.list <- as.numeric(dup.mat)
-  two.dups <- as.numeric(names(which(table(dup.list) > 1)))
-  dup.mat <- dup.mat[-sapply(two.dups, function(i) which(dup.mat == i, arr.ind = TRUE)[-1,1]), ]
-  dup.mat[,2]
-}
 
 #test.map <- qtl::sim.map(len = c(50,50), n.mar = c(100,100), anchor.tel = FALSE, include.x = FALSE, sex.sp = TRUE)
 #View(qtl::map2table(test.map))
-
-
-mkr.sel <- function(){
-  G.sig <- t(G_GWAS[,-c(1:3)]); colnames(G.sig) <- G_GWAS[,1]
-  sig.mat <- data.frame(y_GWAS[,2], G.sig[,G.markers %in% sig.mkrs]); colnames(sig.mat)[1] <- t
-  
-  lm.form <- as.formula(paste(t, "~", paste(sig.mkrs, collapse = "+")))
-  step.out <- step(lm(lm.form, data = sig.mat), scope = as.formula(paste("~", paste(sig.mkrs, collapse = "+"))), direction = "both", k = log(nrow(y_GWAS)), verbose = FALSE)
-  list(final.mkrs = names(step.out$coefficients)[names(step.out$coefficients) %in% sig.mkrs], mkr.LD <- cor(sig.mat[,-1]))
-}
-
 
 
 ### FldTrial.lm -- this fucntion is actually better, replace the other one with this
@@ -106,7 +123,11 @@ mkr.sel <- function(){
 ## G.CV must have individuals as rows and markers as columns... so 100 individuals with 500 markers would be a 100x500 matrix
 ## y.CV must be a numeric vector representing a continuous variable
 
-XValidate.nonInd <- function(y.CV=NULL, G.CV=NULL, models.CV=NULL, frac.train.CV=NULL, nCV.iter.CV=NULL, burnIn.CV=NULL, nIter.CV=NULL){
+
+#'
+#' @rdname internal
+#' 
+XValidate_nonInd <- function(y.CV=NULL, G.CV=NULL, models.CV=NULL, frac.train.CV=NULL, nCV.iter.CV=NULL, burnIn.CV=NULL, nIter.CV=NULL){
   
   gc(verbose = F) ## Close unused connections
   #con.path <- getwd() ## BGLR will write temp files to the wd
@@ -273,7 +294,10 @@ XValidate.nonInd <- function(y.CV=NULL, G.CV=NULL, models.CV=NULL, frac.train.CV
 ## G.CV must have individuals as rows and markers as columns... so 100 individuals with 500 markers would be a 100x500 matrix
 ## y.CV must be a numeric vector representing a continuous variable
 
-XValidate.Ind <- function(y.CV=NULL, G.CV=NULL, models.CV=NULL, nFold.CV=NULL, nFold.CV.reps=NULL, burnIn.CV=NULL, nIter.CV=NULL){
+#'
+#' @rdname internal
+#' 
+XValidate_Ind <- function(y.CV=NULL, G.CV=NULL, models.CV=NULL, nFold.CV=NULL, nFold.CV.reps=NULL, burnIn.CV=NULL, nIter.CV=NULL){
   
   gc(verbose = F) ## Close unused connections
   #con.path <- getwd() ## BGLR will write temp files to the wd
@@ -453,6 +477,10 @@ XValidate.Ind <- function(y.CV=NULL, G.CV=NULL, models.CV=NULL, nFold.CV=NULL, n
 # 
 # Allows other arguments to be passed
 # 
+
+#'
+#' @rdname internal
+#' 
 calc_marker_effects <- function(M, y.df, models = c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR"), nIter, burnIn) {
   
   models <- match.arg(models)

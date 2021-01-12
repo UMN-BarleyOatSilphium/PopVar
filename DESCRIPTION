@@ -5,8 +5,7 @@ Authors@R:
     c(person(given = "Tyler",
            family = "Tiede",
            role = c("aut"),
-           email = "tyler.tiede7@gmail.com",
-           comment = c(ORCID = "YOUR-ORCID-ID")),
+           email = "tyler.tiede7@gmail.com"),
       person(given = "Jeffrey",
              family = "Neyhart",
              role = c("aut", "ctb", "cre"),
@@ -38,6 +37,7 @@ Imports:
     rrBLUP, 
     stats, 
     utils,
+    methods,
     parallel
 Suggests: 
     knitr,
