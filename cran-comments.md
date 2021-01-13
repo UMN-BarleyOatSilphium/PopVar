@@ -15,7 +15,8 @@ New maintainer:
 Old maintainer(s):
   Tyler Tiede <tyler.tiede7@gmail.com>
   
-The maintainer of this package is changing.
+
+This NOTE is acceptable because the maintainer of this package is changing.
 
 
 

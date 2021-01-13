@@ -19,7 +19,7 @@
 #' @param self.gen The number of selfing generations in the potential cross. Can be an integer or \code{Inf} for
 #' recombinant inbreds. Note: \code{self.gen = 1} corresponds to an F2 population.
 #' @param DH Indicator if doubled-haploids are to be induced after the number of selfing generations indicated by
-#' \code{self.gen}. For example, if \code{self.gen = 0} and \code{DH = TRUE}, then doubled-haploids are asssumed
+#' \code{self.gen}. For example, if \code{self.gen = 0} and \code{DH = TRUE}, then doubled-haploids are assumed
 #' to be induced using gametes from F1 plants.
 #' @param models See \code{models} in \code{\link[PopVar]{pop.predict}}.
 #' @param n.core Number of cores for parallelization. Parallelization is supported

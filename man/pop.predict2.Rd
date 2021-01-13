@@ -49,7 +49,7 @@ pop_predict2(
 recombinant inbreds. Note: \code{self.gen = 1} corresponds to an F2 population.}
 
 \item{DH}{Indicator if doubled-haploids are to be induced after the number of selfing generations indicated by
-\code{self.gen}. For example, if \code{self.gen = 0} and \code{DH = TRUE}, then doubled-haploids are asssumed
+\code{self.gen}. For example, if \code{self.gen = 0} and \code{DH = TRUE}, then doubled-haploids are assumed
 to be induced using gametes from F1 plants.}
 
 \item{models}{See \code{models} in \code{\link[PopVar]{pop.predict}}.}

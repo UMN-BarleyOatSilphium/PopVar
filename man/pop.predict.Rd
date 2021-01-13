@@ -39,7 +39,7 @@ pop.predict(
 }
 TIP - Set header=\code{FALSE} within \code{\link{read.table}} or \code{\link{read.csv}} when importing a tab-delimited file containing data for \code{G.in}.}
 
-\item{y.in}{\code{Matrix} of phenotypic data. First column contains entry (taxa) names found in \code{G.in}, regardless of whether the entry has a phenotype for any or all traits. Additional columns contain phenotypic data; column names should reflect the trait name(s). TIP - Set header=\code{TRUE} within \code{\link{read.table}} or \code{\link{read.csv}} when importing a tab-delimited file contianing data for \code{y.in}.}
+\item{y.in}{\code{Matrix} of phenotypic data. First column contains entry (taxa) names found in \code{G.in}, regardless of whether the entry has a phenotype for any or all traits. Additional columns contain phenotypic data; column names should reflect the trait name(s). TIP - Set header=\code{TRUE} within \code{\link{read.table}} or \code{\link{read.csv}} when importing a tab-delimited file containing data for \code{y.in}.}
 
 \item{map.in}{\code{Matrix} of genetic map data, three columns total. Column 1 contains marker names, column 2 contains chromosome number, and column 3 contains cM positions. TIP - Set header=\code{TRUE} within \code{read.table} or \code{read.csv} when importing a tab-delimited file contianing data for \code{map.in}.}
 
@@ -57,7 +57,7 @@ TIP - Set header=\code{FALSE} within \code{\link{read.table}} or \code{\link{rea
 
 \item{mkr.cutoff}{Optional \code{numeric} indicating the maximum missing data per marker when filtering \code{G.in}. Markers missing > \code{mkr.cutoff} data will be removed. Default is \code{0.50}. Set to \code{1} for no filtering.}
 
-\item{entry.cutoff}{Optional \code{numeric} indicating the maximum missing genotypic data per entry alloed when filtering \code{G.in}. Entries missing > \code{entry.cutoff} marker data will be removed. Default is \code{0.50}. Set to \code{1} for no filtering.}
+\item{entry.cutoff}{Optional \code{numeric} indicating the maximum missing genotypic data per entry allowed when filtering \code{G.in}. Entries missing > \code{entry.cutoff} marker data will be removed. Default is \code{0.50}. Set to \code{1} for no filtering.}
 
 \item{remove.dups}{Optional \code{logical}. If \code{TRUE} duplicate entries in the genotype matrix, if present, will be removed. This step may be necessary for missing marker imputation (see \code{impute} below). Default is \code{TRUE}.}
 
@@ -73,7 +73,7 @@ TIP - Set header=\code{FALSE} within \code{\link{read.table}} or \code{\link{rea
 
 \item{nFold.reps}{Optional \code{integer} indicating the number of times \emph{CV method 2} is repeated. The CV accuracy returned is the average \emph{r} of each rep. Default is \code{1}.}
 
-\item{nIter, burnIn}{Optional \code{integer} arguments used by \code{\link[BGLR]{BGLR}} (\cite{de los Compos and Rodriguez, 2014}) when fitting Bayesian models to estimate marker effects. The defaults are \code{12000} and \code{3000}, respectively. These values when conducting CV are fixed \code{1500} and \code{500}, respectively, for computational effeciency.}
+\item{nIter, burnIn}{Optional \code{integer} arguments used by \code{\link[BGLR]{BGLR}} (\cite{de los Compos and Rodriguez, 2014}) when fitting Bayesian models to estimate marker effects. The defaults are \code{12000} and \code{3000}, respectively. These values when conducting CV are fixed \code{1500} and \code{500}, respectively, for computational efficiency.}
 
 \item{models}{Optional \code{Character vector} of the regression models to be used in CV and to estimate marker effects. Options include \code{rrBLUP, BayesA, BayesB, BayesC, BL, BRR}, one or more may be included at a time. CV will be conducted regardless of how many models are included. By default all models are tested.}
 
@@ -82,7 +82,7 @@ TIP - Set header=\code{FALSE} within \code{\link{read.table}} or \code{\link{rea
 \value{
 A \code{list} containing: \itemize{
 \item \code{predictions} A \code{list} of dataframes containing predictions of (\eqn{\mu}), (\emph{V_G}), and (\eqn{\mu}\emph{_sp}). When multiple traits are provided the correlated responses and correlation between all pairwise traits is also included. More specifically, for a given trait pair the correlated response of the secondary trait with both the high and low superior progeny of the primary trait is returned since the favorable values cannot be known by \code{PopVar}.
-\item \code{preds.per.sim} If return.raw is \code{TRUE} then a \code{dataframe} containing the results of each simulation is returned. This is usful for calculating dispersion statistics for traits not provided in the standard \code{predictions} dataframe.
+\item \code{preds.per.sim} If return.raw is \code{TRUE} then a \code{dataframe} containing the results of each simulation is returned. This is useful for calculating dispersion statistics for traits not provided in the standard \code{predictions} dataframe.
 \item \code{CVs} A \code{dataframe} of CV results for each trait/model combination specified.
 \item \code{models.chosen} A \code{matrix} listing the statistical model chosen for each trait.
 \item \code{markers.removed} A \code{vector} of markers removed during filtering for MAF and missing data.
@@ -96,14 +96,14 @@ A \code{list} containing: \itemize{
 \details{
 \code{pop.predict} can be used to predict the mean (\eqn{\mu}), genetic variance (\emph{V_G}), superior progeny values (\eqn{\mu}\eqn{_sp}), as well as the predicted correlated response and correlations between all pairwise traits. The methodology and procedure to do so has been described in \cite{Bernardo (2014)} and \cite{Mohammadi, Tiede, and K.P. Smith (2015)}. Users familiar with genome-wide prediction, association mapping, and/or linkage mapping will be familiar with the
 required inputs of \code{pop.predict}. \code{G.in} includes all of the entries (taxa) in the TP as well as additional entries to be considered as parent candidates. Entries included in \code{G.in} that do have a phenotype for any or all traits in \code{y.in} are considered TP entries for those respective traits. \code{G.in} is filtered according to \code{min.maf}, \code{mkr.cutoff}, \code{entry.cutoff}, and \code{remove.dups};
-remaining missing marker data is imputed using the EM algorith (\cite{Poland et al., 2012}) when possible, and the marker mean otherwise, both implemented in \code{\link{rrBLUP}}. For each trait, the TP (i.e. entries with phenotype) is used to: \enumerate{
+remaining missing marker data is imputed using the EM algorithm (\cite{Poland et al., 2012}) when possible, and the marker mean otherwise, both implemented in \code{\link{rrBLUP}}. For each trait, the TP (i.e. entries with phenotype) is used to: \enumerate{
 \item Perform CV to select a regression model. NOTE - Using the model with the highest CV accuracy is expected to result in the most accurate marker effect estimates (\cite{Bernardo, 2014}). This expectation, however, is yet to be empirically validated and the user is encouraged to investigate the various models in order to make an educated decision about which one to ultimately use.
 \item Estimate marker effects using the model resulting in the highest CV accuracy
 }
 Models include ridge regression BLUP implemented in \code{\link{rrBLUP}} (\cite{Endelman, 2011}) and BayesA, BayesB, BayesC\eqn{\pi}, Bayesian lasso (BL), and Bayesian ridge regression (BRR) implemented in \code{\link{BGLR}} (\cite{de los Compos and Rodriguez, 2014}).
 Information from the \code{map.in} is then used to simulate chromosomal recombination expected in a recombinant inbred line (i.e. \emph{F-infinity}) (\cite{Broman et al., 2003}) population (size=\code{nInd}). A function then converts the recombined chromosomal segments of the generic RIL population to the chromosomal segments of the population's respective parents and GEBVs of the simulated progeny are calculated.
 The simulation and conversion process is repeated \emph{s} times, where \emph{s} = \code{nSim}, to calculate dispersion statistics for \eqn{\mu} and \emph{V_G}; the remainder of the values in the \code{predictions} output are means of the \emph{s} simulations.  During each iteration the correlation (\emph{r}) and correlated response of each pairwise combination of traits is also calculated and their mean across \emph{n} simulations is returned.
-The correlated respons of trait.B when predicting trait.A is the mean of trait.B for the (\eqn{\mu}\eqn{_sp}) of trait.A, and vice-versa; a correlated response for the bottom \code{tail.p} and upper \eqn{1-tail.p} is returned for each trait.\preformatted{     A dataset \code{\link{think_barley.rda}} is provided as an example of the proper formatting of input files and also for users to become familiar with \code{pop.predict}.
+The correlated response of trait.B when predicting trait.A is the mean of trait.B for the (\eqn{\mu}\eqn{_sp}) of trait.A, and vice-versa; a correlated response for the bottom \code{tail.p} and upper \eqn{1-tail.p} is returned for each trait.\preformatted{     A dataset \code{\link{think_barley.rda}} is provided as an example of the proper formatting of input files and also for users to become familiar with \code{pop.predict}.
 }
 }
 \examples{
