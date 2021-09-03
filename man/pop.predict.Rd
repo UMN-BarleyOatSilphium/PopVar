@@ -12,7 +12,7 @@ pop.predict(
   parents = NULL,
   tail.p = 0.1,
   nInd = 200,
-  map.plot = F,
+  map.plot = FALSE,
   min.maf = 0.01,
   mkr.cutoff = 0.5,
   entry.cutoff = 0.5,
@@ -26,7 +26,7 @@ pop.predict(
   nIter = 12000,
   burnIn = 3000,
   models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR"),
-  return.raw = F
+  return.raw = FALSE
 )
 }
 \arguments{

@@ -86,7 +86,7 @@
 #' ## This example uses CV method 1 (see Details of x.val() function)
 #' ex1.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex, 
 #'    map.in = map.in_ex, crossing.table = cross.tab_ex,
-#'    nSim=5, nCV.iter=10)
+#'    nSim=5, nCV.iter=2)
 #' ex1.out$predictions  ## Predicted parameters
 #' ex1.out$CVs          ## CV results
 #'                
@@ -101,6 +101,11 @@
 #' ex3.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex,
 #'    map.in = map.in_ex, crossing.table = cross.tab_ex,
 #'    models = c("rrBLUP", "BL"), nSim=5, nCV.iter=10)  
+#' 
+#' ## Ex. 4 - Same as Ex. 3, but return all raw SNP and prediction data for each simulated population
+#' ex4.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex,
+#'    map.in = map.in_ex, crossing.table = cross.tab_ex,
+#'    models = c("rrBLUP", "BL"), nSim=5, nCV.iter=2, return.raw = TRUE)  
 #' }
 #' 
 #' @importFrom utils write.table read.csv capture.output setTxtProgressBar txtProgressBar
@@ -109,11 +114,25 @@
 #' @export
 #' 
 pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL, 
-                        parents=NULL, tail.p=0.10, nInd=200, map.plot=F, min.maf=0.01, 
+                        parents=NULL, tail.p=0.10, nInd=200, map.plot=FALSE, min.maf=0.01, 
                         mkr.cutoff=0.50, entry.cutoff=0.50, remove.dups=T, impute="EM", 
                         nSim=25, frac.train=0.60, nCV.iter=100, nFold=NULL, nFold.reps=1, 
                         nIter=12000, burnIn=3000, models=c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR"), 
-                        return.raw=F){
+                        return.raw=FALSE){
+      
+  ## Testing only ##
+                      
+  # G.in=NULL; y.in=NULL; map.in=NULL; crossing.table=NULL
+  # parents=NULL; tail.p=0.10; nInd=200; map.plot=F; min.maf=0.01 
+  # mkr.cutoff=0.50; entry.cutoff=0.50; remove.dups=T; impute="EM" 
+  # nSim=25; frac.train=0.60; nCV.iter=100; nFold=NULL; nFold.reps=1 
+  # nIter=12000; burnIn=3000; models=c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR") 
+  # return.raw=F
+  # 
+  # G.in = G.in_ex; y.in = y.in_ex
+  # map.in = map.in_ex; crossing.table = cross.tab_ex; nInd = 1000; nSim = 1; nCV.iter = 1; models = "rrBLUP"; return.raw = TRUE
+  
+  ## Testing ends
   
   ## QC steps
   if(is.null(G.in)) stop("Must provide a genotype (G.in) file.")
@@ -191,7 +210,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
   unlink(paste("map.tmp_", name4out, ".csv", sep=""))
   map_t1 <- qtl::pull.map(read.map)
   options(warn=0)
-  if(map.plot==T) qtl::plot.map(map_t1)
+  if(map.plot) qtl::plot.map(map_t1)
   
   
   ## Imput missing markers with EM... will switch to imputing with the mean if nEntries > nMarkers
@@ -228,8 +247,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
     
     if(t == 1){
       CV.results <- list()
-      mkr_effs.mat <- matrix(NA, ncol = nTraits, nrow = ncol(G.imp))
-      colnames(mkr_effs.mat) <- traits
+      mkr_effs.mat <- matrix(NA, ncol = nTraits, nrow = ncol(G.imp), dimnames = list(colnames(G.imp), traits))
       beta.list <- c()
       best.models <- c()
     }
@@ -306,6 +324,10 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
   cat("\n")
   cat(paste("\nBrewing", nSim, "populations of", nInd, "individuals for each cross... Please be patient", sep=" "))
   cat("\n")
+  # Create an empty list for storing the progeny SNP genotypes and gebvs
+  raw_results_per_cross <- lapply(X = seq_len(nrow(crossing.mat)), FUN = function(i) {
+    `names<-`(vector("list", nSim), paste0("sim", formatC(x = seq_len(nSim), width = nchar(nSim), flag = "0")))
+  })
   prog.bar <- txtProgressBar(min=1,  max=(nrow(crossing.mat)*nSim), style=3); p=1
   M <- nInd
   
@@ -313,7 +335,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
     sim.pop <- qtl::sim.cross(map_t1, type="riself", n.ind = M, model=NULL)
     qtl::write.cross(sim.pop, "csv", paste("sim.pop.tmp_", name4out, sep="")) ## NEED to figure out a way to not read it out and in
     pop.mat <- as.matrix(read.csv(paste("sim.pop.tmp_", name4out, ".csv", sep=""), header=T))[3:(M+2), 2:(length(mkr_effects)+1)]
-    unlink(paste("sim.pop.tmp_", name4out, ".csv", sep=""))   
+    unlink(paste("sim.pop.tmp_", name4out, ".csv", sep=""))  
     
     for(z in 1:nrow(crossing.mat)){
       setTxtProgressBar(prog.bar, p)
@@ -337,11 +359,22 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
         }
       }
       
+      # Add names to the pop mat
+      dimnames(pop.mat2) <- list(paste0("RIL", formatC(seq_len(nInd), width = nchar(nInd), flag = "0")),
+                                 row.names(mkr_effs.mat))
+      
+      # Calculage GEBVs
       prog_pred.mat <- pop.mat2 %*% mkr_effs.mat
+
       for(b in 1:length(beta.list)){
         beta.tmp <- beta.list[b]
         prog_pred.mat[,b] <- prog_pred.mat[,b] +  beta.tmp
       }
+      
+      
+      # Add SNPs and predicted values to the cross_results list - if return.raw is true
+      if (return.raw) raw_results_per_cross[[z]][[s]] <- list(snps = pop.mat2, gebvs = prog_pred.mat)
+      
       
       for(n in 1:nTraits){
         if(s == 1){
@@ -368,9 +401,9 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
       
       p <- p+1 # This is the counter for the progress bar
     } ## End of z loop for each cross
+    
+    
   }## End of nSim (s) loop
-  
-  preds.per.sim <- param.dfs
   
   for(n in 1:nTraits){
     col.names <- colnames(param.dfs[[n]])
@@ -383,8 +416,24 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
   
   if(nTraits == 1) param.dfs <- as.data.frame(param.dfs[[1]])
   
-  if(return.raw) return(list(predictions=param.dfs, preds.per.sim=preds.per.sim, CVs=CV.results, models.chosen=best.models, markers.removed=mkrs.removed, entries.removed=entries.removed))
-  if(!return.raw) return(list(predictions=param.dfs, CVs=CV.results, models.chosen=best.models, markers.removed=mkrs.removed, entries.removed=entries.removed))
+  # Flag based on return.raw
+  if (return.raw) {
+    return(list(predictions=param.dfs, 
+                preds.per.sim=raw_results_per_cross, 
+                CVs=CV.results, 
+                models.chosen=best.models, 
+                markers.removed=mkrs.removed, 
+                entries.removed=entries.removed))
+    
+  } else {
+    return(list(predictions=param.dfs, 
+                CVs=CV.results, 
+                models.chosen=best.models, 
+                markers.removed=mkrs.removed, 
+                entries.removed=entries.removed))
+    
+  }
+
   
 } # End of pop.predict
 
