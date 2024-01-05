@@ -7,3 +7,5 @@
 ^data-raw$
 ^cran-comments\.md$
 ^revdep$
+^doc$
+^Meta$

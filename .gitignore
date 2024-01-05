@@ -7,3 +7,5 @@ Examples/
 README.Rmd
 data-raw/
 inst/doc
+/doc/
+/Meta/

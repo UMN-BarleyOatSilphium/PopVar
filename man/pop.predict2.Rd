@@ -71,9 +71,9 @@ and Neyhart et al. (2019).
 }
 \section{Functions}{
 \itemize{
-\item \code{pop_predict2}: 
-}}
+\item \code{pop_predict2()}: 
 
+}}
 \examples{
 
 \dontrun{

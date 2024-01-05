@@ -42,7 +42,7 @@ TIP - Set header=\code{FALSE} within \code{\link{read.table}} or \code{\link{rea
 
 \item{remove.dups}{Optional \code{logical}. If \code{TRUE} duplicate entries in the genotype matrix, if present, will be removed. This step may be necessary for missing marker imputation (see \code{impute}). Default is \code{TRUE}.}
 
-\item{impute}{Options include \code{c("EM", "mean", "pass")}. By default (i.e. \code{"EM"}), after filtering missing genotypic data will be imputed via the EM algorithm implemented in \code{\link{rrBLUP}} (\cite{Endelman, 2011}; \cite{Poland et al., 2012}). If \code{"mean"} missing genotypic data will be imputed via the 'marker mean' method, also implemented in \code{\link{rrBLUP}}. Enter \code{"pass"} if a pre-filtered and imputed genotype matrix is provided to \code{G.in}.}
+\item{impute}{Options include \code{c("EM", "mean", "pass")}. By default (i.e. \code{"EM"}), after filtering missing genotypic data will be imputed via the EM algorithm implemented in \code{\link{rrBLUP-package}} (\cite{Endelman, 2011}; \cite{Poland et al., 2012}). If \code{"mean"} missing genotypic data will be imputed via the 'marker mean' method, also implemented in \code{\link{rrBLUP-package}}. Enter \code{"pass"} if a pre-filtered and imputed genotype matrix is provided to \code{G.in}.}
 
 \item{frac.train}{Optional \code{numeric} indicating the fraction of the TP that is used to estimate marker effects (i.e. the prediction set) under cross-validation (CV) method 1 (see \code{Details}). The remaining \eqn{(1-frac.trait)} of the TP will then comprise the prediction set.}
 
@@ -71,8 +71,10 @@ A list containing: \itemize{
 }
 }
 \description{
-\code{x.val} performs cross-validation (CV) to estimate the accuracy of genome-wide prediction (otherwise known as genomic selection) for a specific training population (TP), i.e. a set of individuals for which phenotypic and genotypic data is available. Cross-validation can be conducted via one of two methods within \code{x.val}, see \code{Details} for more information.\preformatted{         NOTE - \code{x.val}, specifically \code{\link[BGLR]{BGLR}} writes and reads files to disk so it is highly recommended to set your working directory
-}
+\code{x.val} performs cross-validation (CV) to estimate the accuracy of genome-wide prediction (otherwise known as genomic selection) for a specific training population (TP), i.e. a set of individuals for which phenotypic and genotypic data is available. Cross-validation can be conducted via one of two methods within \code{x.val}, see \code{Details} for more information.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{         NOTE - \code{x.val}, specifically \code{\link[BGLR]{BGLR}} writes and reads files to disk so it is highly recommended to set your working directory
+}\if{html}{\out{</div>}}
 }
 \details{
 Two CV methods are available within \code{PopVar}: \itemize{
