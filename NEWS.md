@@ -7,3 +7,7 @@
 # PopVar 1.3.0.001
 
 * Edited the pop.predict function to return raw SNPs and predicted genotypic values when using the return.raw argument.
+
+# PopVar 1.3.1
+
+* Patch to comply with CRAN checks

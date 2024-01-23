@@ -626,6 +626,8 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
 #'
 #' @examples
 #' 
+#' \dontrun{
+#' 
 #' # Load data
 #' data("think_barley")
 #' 
@@ -638,17 +640,8 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
 #' out <- pop_predict2(M = G.in_ex_mat, y.in = y.in_ex, map.in = map.in_ex, 
 #'                     parents = y.in_ex$Entry[1:10])
 #'                     
-#' # Make predictions for 5 crosses with various levels of inbreeding
-#' out_list <- lapply(X = 1:10, FUN = function(self.gen) {
-#'   out <- pop_predict2(M = G.in_ex_mat, y.in = y.in_ex, map.in = map.in_ex, 
-#'                       crossing.table = cross.tab_ex[1:5,], self.gen = self.gen)
-#'   out$self.gen <- self.gen
-#'   out })
-#'                
-#' # Plot predictions of grain yield genetic variance over levels of inbreeding
-#' dat <- do.call("rbind", lapply(out_list, subset, trait == "Yield"))
-#' plot(pred_varG ~ self.gen, data = dat, type = "b", 
-#'      subset = parent1 == parent1[1] & parent2 == parent2[1])
+#' }
+#'                     
 #'
 #' @importFrom qtl mf.h
 #' @importFrom rrBLUP mixed.solve
