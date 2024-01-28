@@ -10,16 +10,17 @@ x.val(
   min.maf = 0.01,
   mkr.cutoff = 0.5,
   entry.cutoff = 0.5,
-  remove.dups = T,
+  remove.dups = TRUE,
   impute = "EM",
   frac.train = 0.6,
   nCV.iter = 100,
   nFold = NULL,
   nFold.reps = 1,
-  return.estimates = F,
+  return.estimates = FALSE,
   CV.burnIn = 750,
   CV.nIter = 1500,
-  models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR")
+  models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR"),
+  saveAt = tempdir()
 )
 }
 \arguments{
@@ -59,6 +60,9 @@ TIP - Set header=\code{FALSE} within \code{\link{read.table}} or \code{\link{rea
 \item{CV.nIter}{Optional \code{integer} argument used by \code{\link[BGLR]{BGLR}} (\cite{de los Compos and Rodriguez, 2014}) when fitting Bayesian models. Default is \code{1500}.}
 
 \item{models}{Optional \code{character vector} of the regression models to be used in CV and to estimate marker effects. Options include \code{rrBLUP, BayesA, BayesB, BayesC, BL, BRR}, one or more may be included at a time. By default all models are tested.}
+
+\item{saveAt}{When using models other than "rrBLUP" (i.e. Bayesian models), this is a path and prefix for saving temporary files
+the are produced by the \code{\link[BGLR]{BGLR}} function.}
 }
 \value{
 A list containing: \itemize{
@@ -83,7 +87,7 @@ Two CV methods are available within \code{PopVar}: \itemize{
 }
 }
 \examples{
-\dontrun{
+\donttest{
 ## CV using method 1 with 25 iterations
 CV.mthd1 <- x.val(G.in = G.in_ex, y.in = y.in_ex, nCV.iter = 25)
 CV.mthd1$CVs

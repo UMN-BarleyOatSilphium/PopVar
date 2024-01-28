@@ -31,6 +31,9 @@
 #' @param nIter,burnIn Optional \code{integer} arguments used by \code{\link[BGLR]{BGLR}} (\cite{de los Compos and Rodriguez, 2014}) when fitting Bayesian models to estimate marker effects. The defaults are \code{12000} and \code{3000}, respectively. These values when conducting CV are fixed \code{1500} and \code{500}, respectively, for computational efficiency.
 #' @param models Optional \code{Character vector} of the regression models to be used in CV and to estimate marker effects. Options include \code{rrBLUP, BayesA, BayesB, BayesC, BL, BRR}, one or more may be included at a time. CV will be conducted regardless of how many models are included. By default all models are tested.
 #' @param return.raw Optional \code{logical}. If \code{TRUE} then \code{pop.predict} will return the results of each simulation in addition to the summarized dataframe. Default is \code{FALSE}.
+#' @param saveAt When using models other than "rrBLUP" (i.e. Bayesian models), this is a path and prefix for saving temporary files 
+#' the are produced by the \code{\link[BGLR]{BGLR}} function.
+#' 
 #' @details \code{pop.predict} can be used to predict the mean (\eqn{\mu}), genetic variance (\emph{V_G}), superior progeny values (\eqn{\mu}\eqn{_sp}), as well as the predicted correlated response and correlations between all pairwise traits. The methodology and procedure to do so has been described in \cite{Bernardo (2014)} and \cite{Mohammadi, Tiede, and K.P. Smith (2015)}. Users familiar with genome-wide prediction, association mapping, and/or linkage mapping will be familiar with the
 #'          required inputs of \code{pop.predict}. \code{G.in} includes all of the entries (taxa) in the TP as well as additional entries to be considered as parent candidates. Entries included in \code{G.in} that do have a phenotype for any or all traits in \code{y.in} are considered TP entries for those respective traits. \code{G.in} is filtered according to \code{min.maf}, \code{mkr.cutoff}, \code{entry.cutoff}, and \code{remove.dups};
 #'          remaining missing marker data is imputed using the EM algorithm (\cite{Poland et al., 2012}) when possible, and the marker mean otherwise, both implemented in \code{\link{rrBLUP-package}}. For each trait, the TP (i.e. entries with phenotype) is used to: \enumerate{
@@ -67,20 +70,11 @@
 #'      Poland, J., J. Endelman, J. Dawson, J. Rutkoski, S. Wu, Y. Manes, S. Dreisigacker, J. Crossa, H. Sanches-Villeda, M. Sorrells, and J.-L. Jannink. 2012. Genomic Selection in Wheat Breeding using Genotyping-by-Sequencing. Plant Genome 5:103-113.
 #'      
 #' @examples 
+#' 
 #' \dontrun{
-#' ## View formatting
-#' ## Use View() in RStudio or R GUI with X11 forwarding
-#' ## Use head() in R GUI without X11 forwarding
-#' View(G.in_ex)
-#' View(y.in_ex)
-#' View(map.in_ex)
-#' View(cross.tab_ex)
 #' 
-#' ## setwd() - pop.predict writes and reads files to disk
-#' ##   so it is recommended to set your working directory
-#' 
-#' ## nSim and nFold are set to low values in the
-#' ## examples for sake of computing time
+#' # Load data
+#' data("think_barley")
 #' 
 #' ## Ex. 1 - Predict a defined set of crosses
 #' ## This example uses CV method 1 (see Details of x.val() function)
@@ -92,7 +86,7 @@
 #'                
 #' ## Ex. 2 - Predict all pairwise crosses between a list of parents
 #' ## This example uses CV method 2 (see Details of x.val() function)
-#' par.list <- sample(y.in_ex[,1], size = 10, replace = F)
+#' par.list <- sample(y.in_ex[,1], size = 10, replace = FALSE)
 #' ex2.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex,
 #'    map.in = map.in_ex, parents = par.list, 
 #'    nSim=5, nFold=5, nFold.reps=2)
@@ -115,10 +109,10 @@
 #' 
 pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL, 
                         parents=NULL, tail.p=0.10, nInd=200, map.plot=FALSE, min.maf=0.01, 
-                        mkr.cutoff=0.50, entry.cutoff=0.50, remove.dups=T, impute="EM", 
+                        mkr.cutoff=0.50, entry.cutoff=0.50, remove.dups=TRUE, impute="EM", 
                         nSim=25, frac.train=0.60, nCV.iter=100, nFold=NULL, nFold.reps=1, 
                         nIter=12000, burnIn=3000, models=c("rrBLUP", "BayesA", "BayesB","BayesC", "BL", "BRR"), 
-                        return.raw=FALSE){
+                        return.raw=FALSE, saveAt = tempdir()){
       
   ## Testing only ##
                       
@@ -204,19 +198,17 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
   
   
   ### Read in genetic map for the markers
-  options(warn=-1) ## Temporarily turn off warnings
   read.map.out <-capture.output(read.map <- qtl::read.cross(format="csv", crosstype = "riself", file= paste("map.tmp_", name4out, ".csv", sep=""), na.strings="NA"))
-  print(paste("Number of Markers Read in: ", unlist(strsplit(read.map.out[3], split = " "), recursive = T)[2], sep = ""), quote=F)
+  print(paste("Number of Markers Read in: ", unlist(strsplit(read.map.out[3], split = " "), recursive = TRUE)[2], sep = ""), quote=FALSE)
   unlink(paste("map.tmp_", name4out, ".csv", sep=""))
   map_t1 <- qtl::pull.map(read.map)
-  options(warn=0)
   if(map.plot) qtl::plot.map(map_t1)
   
   
   ## Imput missing markers with EM... will switch to imputing with the mean if nEntries > nMarkers
   ## Will need to use our own MAF filter so that we can keep track of which markers are removed due to MAF and missing data
-  if(impute == "EM") G.imp <- rrBLUP::A.mat(G.mat, min.MAF = 0, max.missing = 1, impute.method = "EM", return.imputed = T)$imputed
-  if(impute == "mean") G.imp <- rrBLUP::A.mat(G.mat, min.MAF = 0, max.missing = 1, impute.method = "mean", return.imputed = T)$imputed
+  if(impute == "EM") G.imp <- rrBLUP::A.mat(G.mat, min.MAF = 0, max.missing = 1, impute.method = "EM", return.imputed = TRUE)$imputed
+  if(impute == "mean") G.imp <- rrBLUP::A.mat(G.mat, min.MAF = 0, max.missing = 1, impute.method = "mean", return.imputed = TRUE)$imputed
   if(impute == "pass") G.imp <- G.mat
   
   ### Start simulation
@@ -233,14 +225,10 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
     G_TP <- G.imp[y_notNAs, ] 
     
     if(t==1){
-      cat("\n")
-      cat("Warnings about 'closing unused connections' AND 'Error in rinvGauss' can be safely disregarded... They are dealt with internally")
-      cat("\n")
+      message("Warnings about 'closing unused connections' AND 'Error in rinvGauss' can be safely disregarded... They are dealt with internally\n")
     }
     
-    cat("\n")
-    cat(paste("Selecting best model via cross validation for ", trait, " and estimating marker effects", sep=""))
-    cat("\n")    
+    message(paste("Selecting best model via cross validation for ", trait, " and estimating marker effects...\n", sep=""))
     
     if(is.null(nFold)) junk <- capture.output(xval.out <- XValidate_nonInd(y.CV = y_TP, G.CV = G_TP, models.CV = models, frac.train.CV=frac.train, nCV.iter.CV=nCV.iter, burnIn.CV = 750, nIter.CV = 1500)$CV.summary)
     if(!is.null(nFold)) junk <- capture.output(xval.out <- XValidate_Ind(y.CV = y_TP, G.CV = G_TP, models.CV = models, nFold.CV = nFold, nFold.CV.reps = nFold.reps, burnIn.CV = 750, nIter.CV = 1500)$CV.summary)
@@ -263,7 +251,8 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
       beta <- as.numeric(mix.solve.out$beta)
       mkr_effects <- mix.solve.out$u
     }else{
-      capture.output(bayes.fit <- BGLR::BGLR(y=y_TP, ETA=list(list(X=G_TP, model=best.model)), verbose=F, nIter=nIter, burnIn=burnIn))
+      capture.output(bayes.fit <- BGLR::BGLR(y=y_TP, ETA=list(list(X=G_TP, model=best.model)), verbose=FALSE, nIter=nIter, 
+                                             burnIn=burnIn, saveAt = saveAt))
       mkr_effects <- as.numeric(bayes.fit$ETA[[1]]$b)
       beta <- bayes.fit$mu  
     }
@@ -273,8 +262,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
     
   }
   
-  cat("\n")
-  cat("Cross validation is complete!")
+  message("Cross validation is complete!")
   
   ## Set up which crosses to predict
   if(!is.null(crossing.table)){ ## Used when the user provides a list of specific crosses, parents come from G.in.entries (i.e. not necessarily in TP)
@@ -321,9 +309,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
   
   
   ## Start simulation and var.prd process
-  cat("\n")
-  cat(paste("\nBrewing", nSim, "populations of", nInd, "individuals for each cross... Please be patient", sep=" "))
-  cat("\n")
+  message(paste("\nBrewing", nSim, "populations of", nInd, "individuals for each cross... Please be patient\n", sep=" "))
   # Create an empty list for storing the progeny SNP genotypes and gebvs
   raw_results_per_cross <- lapply(X = seq_len(nrow(crossing.mat)), FUN = function(i) {
     `names<-`(vector("list", nSim), paste0("sim", formatC(x = seq_len(nSim), width = nchar(nSim), flag = "0")))
@@ -334,7 +320,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
   for(s in 1:nSim){
     sim.pop <- qtl::sim.cross(map_t1, type="riself", n.ind = M, model=NULL)
     qtl::write.cross(sim.pop, "csv", paste("sim.pop.tmp_", name4out, sep="")) ## NEED to figure out a way to not read it out and in
-    pop.mat <- as.matrix(read.csv(paste("sim.pop.tmp_", name4out, ".csv", sep=""), header=T))[3:(M+2), 2:(length(mkr_effects)+1)]
+    pop.mat <- as.matrix(read.csv(paste("sim.pop.tmp_", name4out, ".csv", sep=""), header=TRUE))[3:(M+2), 2:(length(mkr_effects)+1)]
     unlink(paste("sim.pop.tmp_", name4out, ".csv", sep=""))  
     
     for(z in 1:nrow(crossing.mat)){
@@ -355,7 +341,7 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
       
       if(ncol(replace.0.mat) > 0){
         for(b in 1:ncol(replace.0.mat)){
-          pop.mat2[which(pop.mat2[,replace.0.mat[1,b]] == 0), replace.0.mat[1,b]] <- sample(c(1,-1), size = replace.0.mat[2,b],  replace = T, prob = c(.5,.5))
+          pop.mat2[which(pop.mat2[,replace.0.mat[1,b]] == 0), replace.0.mat[1,b]] <- sample(c(1,-1), size = replace.0.mat[2,b],  replace = TRUE, prob = c(.5,.5))
         }
       }
       
@@ -391,8 +377,8 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
         ## Calculate correlations between traits and correlated response and 
         if(nTraits > 1){
           index <- 1; for(n2 in (1:nTraits)[-n]){
-            param.dfs[[n]][[z, 10+index]][s] <- mean(prog_pred.mat[,n2][which(prog_pred.mat[,n] <= quantile(prog_pred.mat[,n], probs = tail.p))], na.rm = T)
-            param.dfs[[n]][[z, 10+(nTraits-1)+index]][s] <- mean(prog_pred.mat[,n2][which(prog_pred.mat[,n] >= quantile(prog_pred.mat[,n], probs = 1-tail.p))], na.rm = T)
+            param.dfs[[n]][[z, 10+index]][s] <- mean(prog_pred.mat[,n2][which(prog_pred.mat[,n] <= quantile(prog_pred.mat[,n], probs = tail.p))], na.rm = TRUE)
+            param.dfs[[n]][[z, 10+(nTraits-1)+index]][s] <- mean(prog_pred.mat[,n2][which(prog_pred.mat[,n] >= quantile(prog_pred.mat[,n], probs = 1-tail.p))], na.rm = TRUE)
             param.dfs[[n]][[z, 10+2*(nTraits-1)+index]][s] <- cor(prog_pred.mat[,n], prog_pred.mat[,n2], use = "complete.obs")
             index <- index+1
           }
@@ -409,8 +395,8 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
     col.names <- colnames(param.dfs[[n]])
     for(c in 3:length(col.names)){
       name.tmp <- col.names[c]
-      if(name.tmp %in% c("pred.mu_sd", "pred.varG_sd")) param.dfs[[n]][,c] <- sapply(param.dfs[[n]][,c], FUN = sd, na.rm=T)
-      if(!name.tmp %in% c("pred.mu_sd", "pred.varG_sd")) param.dfs[[n]][,c] <- sapply(param.dfs[[n]][,c], FUN = mean, na.rm=T)
+      if(name.tmp %in% c("pred.mu_sd", "pred.varG_sd")) param.dfs[[n]][,c] <- sapply(param.dfs[[n]][,c], FUN = sd, na.rm=TRUE)
+      if(!name.tmp %in% c("pred.mu_sd", "pred.varG_sd")) param.dfs[[n]][,c] <- sapply(param.dfs[[n]][,c], FUN = mean, na.rm=TRUE)
     }
   }
   
@@ -463,9 +449,21 @@ pop.predict <- function(G.in=NULL, y.in=NULL, map.in=NULL, crossing.table=NULL,
 #' Predictions are based on the deterministic equations specified by Zhong and Jannink (2007), Allier et al. (2019),
 #' and Neyhart et al. (2019).
 #' 
+#' If you select a \code{model} other than "rrBLUP", you must specify the following additional arguments:
+#' \itemize{
+#'   \item{\code{nIter}: See \code{\link[PopVar]{pop.predict}}}.
+#'   \item{\code{burnIn}: See \code{\link[PopVar]{pop.predict}}}.
+#' }
+#' 
+#' 
+#' @return
+#' A \code{data.frame} containing predictions of \eqn{\mu}, \eqn{V_G}, and \eqn{\mu_{sp}} for 
+#' each trait for each potential bi-parental cross. When multiple traits are provided, the correlated 
+#' responses and correlation between all pairs of traits is also returned.
+#' 
 #' @examples 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' # Load data
 #' data("think_barley")
@@ -576,10 +574,10 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
     
   }
   
-  if (any(!parents %in% G.in_use[,1,drop = T]))
+  if (any(!parents %in% G.in_use[,1,drop = TRUE]))
     stop("Parents are not in G.in.")
   
-  ## If self.gen is Inf and DH is T, error
+  ## If self.gen is Inf and DH is TRUE, error
   if (is.infinite(self.gen) & DH) stop("Infinite selfing generations and doubled-haploid production cannot both occur.")
   
   ## Set the factors of line names in y.in to those in the marker df and those in the y.in
@@ -626,7 +624,7 @@ pop.predict2 <- function(G.in, y.in, map.in, crossing.table, parents, tail.p = 0
 #'
 #' @examples
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' # Load data
 #' data("think_barley")

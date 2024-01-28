@@ -62,12 +62,23 @@ to be induced using gametes from F1 plants.}
 \item{marker.effects}{A data frame of marker effects. The first column should include the marker name and
 subsequent columns should include the marker effects. Supercedes \code{y.in} if passed.}
 }
+\value{
+A \code{data.frame} containing predictions of \eqn{\mu}, \eqn{V_G}, and \eqn{\mu_{sp}} for
+each trait for each potential bi-parental cross. When multiple traits are provided, the correlated
+responses and correlation between all pairs of traits is also returned.
+}
 \description{
 Generates predictions of the genetic variance and genetic correlation in bi-parental populations using a set of deterministic equations instead of simulations.
 }
 \details{
 Predictions are based on the deterministic equations specified by Zhong and Jannink (2007), Allier et al. (2019),
 and Neyhart et al. (2019).
+
+If you select a \code{model} other than "rrBLUP", you must specify the following additional arguments:
+\itemize{
+\item{\code{nIter}: See \code{\link[PopVar]{pop.predict}}}.
+\item{\code{burnIn}: See \code{\link[PopVar]{pop.predict}}}.
+}
 }
 \section{Functions}{
 \itemize{
@@ -76,7 +87,7 @@ and Neyhart et al. (2019).
 }}
 \examples{
 
-\dontrun{
+\donttest{
 
 # Load data
 data("think_barley")
@@ -105,7 +116,7 @@ plot(pred_varG ~ self.gen, data = dat, type = "b",
 }
 
 
-\dontrun{
+\donttest{
 
 # Load data
 data("think_barley")

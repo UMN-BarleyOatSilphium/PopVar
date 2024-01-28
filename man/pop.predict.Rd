@@ -16,7 +16,7 @@ pop.predict(
   min.maf = 0.01,
   mkr.cutoff = 0.5,
   entry.cutoff = 0.5,
-  remove.dups = T,
+  remove.dups = TRUE,
   impute = "EM",
   nSim = 25,
   frac.train = 0.6,
@@ -26,7 +26,8 @@ pop.predict(
   nIter = 12000,
   burnIn = 3000,
   models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR"),
-  return.raw = FALSE
+  return.raw = FALSE,
+  saveAt = tempdir()
 )
 }
 \arguments{
@@ -78,6 +79,9 @@ TIP - Set header=\code{FALSE} within \code{\link{read.table}} or \code{\link{rea
 \item{models}{Optional \code{Character vector} of the regression models to be used in CV and to estimate marker effects. Options include \code{rrBLUP, BayesA, BayesB, BayesC, BL, BRR}, one or more may be included at a time. CV will be conducted regardless of how many models are included. By default all models are tested.}
 
 \item{return.raw}{Optional \code{logical}. If \code{TRUE} then \code{pop.predict} will return the results of each simulation in addition to the summarized dataframe. Default is \code{FALSE}.}
+
+\item{saveAt}{When using models other than "rrBLUP" (i.e. Bayesian models), this is a path and prefix for saving temporary files
+the are produced by the \code{\link[BGLR]{BGLR}} function.}
 }
 \value{
 A \code{list} containing: \itemize{
@@ -111,20 +115,11 @@ The correlated response of trait.B when predicting trait.A is the mean of trait.
 }\if{html}{\out{</div>}}
 }
 \examples{
+
 \dontrun{
-## View formatting
-## Use View() in RStudio or R GUI with X11 forwarding
-## Use head() in R GUI without X11 forwarding
-View(G.in_ex)
-View(y.in_ex)
-View(map.in_ex)
-View(cross.tab_ex)
 
-## setwd() - pop.predict writes and reads files to disk
-##   so it is recommended to set your working directory
-
-## nSim and nFold are set to low values in the
-## examples for sake of computing time
+# Load data
+data("think_barley")
 
 ## Ex. 1 - Predict a defined set of crosses
 ## This example uses CV method 1 (see Details of x.val() function)
@@ -136,7 +131,7 @@ ex1.out$CVs          ## CV results
                
 ## Ex. 2 - Predict all pairwise crosses between a list of parents
 ## This example uses CV method 2 (see Details of x.val() function)
-par.list <- sample(y.in_ex[,1], size = 10, replace = F)
+par.list <- sample(y.in_ex[,1], size = 10, replace = FALSE)
 ex2.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex,
    map.in = map.in_ex, parents = par.list, 
    nSim=5, nFold=5, nFold.reps=2)
