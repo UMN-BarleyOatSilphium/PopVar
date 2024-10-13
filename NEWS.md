@@ -1,4 +1,4 @@
-# PopVar (development version)
+# PopVar 1.3.3
 
 # PopVar 1.3.0
 
