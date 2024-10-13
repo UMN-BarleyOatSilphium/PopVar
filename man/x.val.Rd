@@ -43,7 +43,7 @@ TIP - Set header=\code{FALSE} within \code{\link{read.table}} or \code{\link{rea
 
 \item{remove.dups}{Optional \code{logical}. If \code{TRUE} duplicate entries in the genotype matrix, if present, will be removed. This step may be necessary for missing marker imputation (see \code{impute}). Default is \code{TRUE}.}
 
-\item{impute}{Options include \code{c("EM", "mean", "pass")}. By default (i.e. \code{"EM"}), after filtering missing genotypic data will be imputed via the EM algorithm implemented in \code{\link{rrBLUP-package}} (\cite{Endelman, 2011}; \cite{Poland et al., 2012}). If \code{"mean"} missing genotypic data will be imputed via the 'marker mean' method, also implemented in \code{\link{rrBLUP-package}}. Enter \code{"pass"} if a pre-filtered and imputed genotype matrix is provided to \code{G.in}.}
+\item{impute}{Options include \code{c("EM", "mean", "pass")}. By default (i.e. \code{"EM"}), after filtering missing genotypic data will be imputed via the EM algorithm implemented in \code{\link[rrBLUP]{A.mat}}  (\cite{Endelman, 2011}; \cite{Poland et al., 2012}). If \code{"mean"} missing genotypic data will be imputed via the 'marker mean' method, also implemented in \code{\link[rrBLUP]{A.mat}}. Enter \code{"pass"} if a pre-filtered and imputed genotype matrix is provided to \code{G.in}.}
 
 \item{frac.train}{Optional \code{numeric} indicating the fraction of the TP that is used to estimate marker effects (i.e. the prediction set) under cross-validation (CV) method 1 (see \code{Details}). The remaining \eqn{(1-frac.trait)} of the TP will then comprise the prediction set.}
 
