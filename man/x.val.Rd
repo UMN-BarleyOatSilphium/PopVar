@@ -88,11 +88,15 @@ Two CV methods are available within \code{PopVar}: \itemize{
 }
 \examples{
 \donttest{
+
+## The following examples only use the model 'rrBLUP' for the sake of testing. Functions
+## BGLR package write temporary files to the disk.
+
 ## CV using method 1 with 25 iterations
-CV.mthd1 <- x.val(G.in = G.in_ex, y.in = y.in_ex, nCV.iter = 25)
+CV.mthd1 <- x.val(G.in = G.in_ex, y.in = y.in_ex, nCV.iter = 25, models = "rrBLUP")
 CV.mthd1$CVs
 
 ## CV using method 2 with 5 folds and 3 replications
-x.val(G.in = G.in_ex, y.in = y.in_ex, nFold = 5, nFold.reps = 3)
+x.val(G.in = G.in_ex, y.in = y.in_ex, nFold = 5, nFold.reps = 3, models = "rrBLUP")
 }
 }

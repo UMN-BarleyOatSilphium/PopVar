@@ -76,30 +76,26 @@
 #' # Load data
 #' data("think_barley")
 #' 
+#' ## The following examples only use the model 'rrBLUP' for the sake of testing. Functions
+#' ## BGLR package write temporary files to the disk.
+#' ##
 #' ## Ex. 1 - Predict a defined set of crosses
 #' ## This example uses CV method 1 (see Details of x.val() function)
 #' ex1.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex, 
 #'    map.in = map.in_ex, crossing.table = cross.tab_ex,
-#'    nSim=5, nCV.iter=2)
+#'    nSim=5, nCV.iter=2, models = "rrBLUP")
 #' ex1.out$predictions  ## Predicted parameters
 #' ex1.out$CVs          ## CV results
-#'                
-#' ## Ex. 2 - Predict all pairwise crosses between a list of parents
-#' ## This example uses CV method 2 (see Details of x.val() function)
-#' par.list <- sample(y.in_ex[,1], size = 10, replace = FALSE)
-#' ex2.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex,
-#'    map.in = map.in_ex, parents = par.list, 
-#'    nSim=5, nFold=5, nFold.reps=2)
 #'        
-#' ## Ex. 3 - Use only rrBLUP and Bayesian lasso (BL) models
+#' ## Ex. 2 - Use only rrBLUP and Bayesian lasso (BL) models
 #' ex3.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex,
 #'    map.in = map.in_ex, crossing.table = cross.tab_ex,
-#'    models = c("rrBLUP", "BL"), nSim=5, nCV.iter=10)  
+#'    models = c("rrBLUP"), nSim=5, nCV.iter=10)  
 #' 
-#' ## Ex. 4 - Same as Ex. 3, but return all raw SNP and prediction data for each simulated population
+#' ## Ex. 3 - Same as Ex. 3, but return all raw SNP and prediction data for each simulated population
 #' ex4.out <- pop.predict(G.in = G.in_ex, y.in = y.in_ex,
 #'    map.in = map.in_ex, crossing.table = cross.tab_ex,
-#'    models = c("rrBLUP", "BL"), nSim=5, nCV.iter=2, return.raw = TRUE)  
+#'    models = c("rrBLUP"), nSim=5, nCV.iter=2, return.raw = TRUE)  
 #' }
 #' 
 #' @importFrom utils write.table read.csv capture.output setTxtProgressBar txtProgressBar
