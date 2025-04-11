@@ -1,4 +1,4 @@
-#' Estimate genomewide prediction accuracy using cross-validation
+#' Predict breeding values or genotypic values
 #' 
 #' 
 #' @param data A \code{PopVar.data} object from \code{read_PopVar}.
@@ -12,9 +12,5 @@
 #' 
 #' @export
 #' 
-cross_validate <- function(data, models, method = c("frac", "kfold", "loo"), p.test, k, reps, group) {
+predict_merit <- function(data) {}
   
-  
-  
-  
-}
