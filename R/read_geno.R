@@ -42,7 +42,6 @@
 #'
 #' @importFrom utils read.csv capture.output
 #' @import Matrix
-#' @import StageWise
 #' 
 #' @export
 #'
@@ -231,30 +230,8 @@ read_geno <- function(filename, geno, ploidy = 2L, phased = FALSE, sep = ".", mi
   cat(sub("X",n,"Number of genotypes = X\n"))
 
   
-  coeff <- Matrix::Matrix(scale(t(geno_mat),scale=F), dimnames=list(id,rownames(geno_mat)))
-  coeff[is.na(coeff)] <- 0
-  
-  scale <- ploidy*sum(p*(1-p))
-  G <- Matrix::tcrossprod(coeff)/scale
-  w <- 1e-5
-  
-  H <- (1-w)*G + w*mean(diag(G))*Diagonal(n=nrow(G))
-
-  if (dominance) {
-    Pmat <- kronecker(matrix(p,nrow=1,ncol=m),matrix(1,ncol=1,nrow=n))
-    coeff.D <- Matrix(-2*choose(ploidy,2)*Pmat^2 + 2*(ploidy-1)*Pmat*t(geno_mat) - t(geno_mat)*(t(geno_mat)-1))
-    coeff.D[is.na(coeff.D)] <- 0
-    scale.D <- 4*choose(ploidy,2)*sum(p^2*(1-p)^2)
-    D <- tcrossprod(coeff.D)/scale.D
-    D <- (1-w)*D + (w)*mean(diag(D))*Diagonal(n=nrow(D))
-    
-  } else {
-    D <- Diagonal(0)
-
-  }
-  
   output <- new(Class = "PopVar.geno", ploidy = as.integer(ploidy), map = map, geno.mat = geno_mat, haplo.mat = haplo_mat, 
-                phased = phased, G = G, D = D)
+                phased = phased)
   
   return(output)
 }
