@@ -3,11 +3,9 @@
 .RData
 .Ruserdata
 PopVar.Rproj
-Examples/
-README.Rmd
 data-raw/
 inst/doc
 /doc/
-/Meta/
 .DS_Store
 cran-comments.md
+tests/

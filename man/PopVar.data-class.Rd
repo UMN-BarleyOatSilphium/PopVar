@@ -11,6 +11,20 @@ S4 class of genotypic and phenotypic data
 \section{Slots}{
 
 \describe{
+\item{\code{ploidy}}{The ploidy level.}
+
+\item{\code{map}}{A data frame of the genetic map information.}
+
+\item{\code{geno.mat}}{A matrix of marker genotypes.}
+
+\item{\code{haplo.mat}}{A matrix of haplotypes.}
+
+\item{\code{phased}}{Whether the marker data was phased.}
+
+\item{\code{missing}}{Whether there is any missing marker data.}
+
+\item{\code{assume.inbred}}{Whether to assume unphased marker data comes from completely homozygous individuals.}
+
 \item{\code{geno}}{A \code{\link{PopVar.geno}} object.}
 
 \item{\code{pheno}}{A data frame of phenotypic data}

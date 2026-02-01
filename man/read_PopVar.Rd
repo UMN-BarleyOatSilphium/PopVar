@@ -2,37 +2,102 @@
 % Please edit documentation in R/read_PopVar.R
 \name{read_PopVar}
 \alias{read_PopVar}
-\title{Prepare phenotype and marker genotype data}
+\title{Read in phenotypic and marker genotype data}
 \usage{
-read_PopVar(geno, pheno, n.traits, delim = ",")
+read_PopVar(
+  geno,
+  pheno,
+  n.traits,
+  ploidy = 2L,
+  phased = FALSE,
+  sep = ".",
+  assume.inbred = FALSE,
+  max.ind.miss = 0.5,
+  max.mar.miss = 0.5,
+  min.mac = 5,
+  max.r2 = 1,
+  dominance = FALSE,
+  delim = ","
+)
 }
 \arguments{
-\item{geno}{An object of class \code{PopVar.geno} from the \code{\link{read_geno}} function.}
+\item{geno}{A data frame or path to a file containing the marker allele dosages. See Details for information
+about formatting.}
 
-\item{pheno}{A data frame or filename of the phenotypic data. The first column of the data frame or file should
-be the genotype ID, columns 2 through \code{n.traits + 1} are trait columns, and subsequent columns are fixed effects.}
+\item{pheno}{A data frame or path to a file containing the phenotypic data. See Details for information
+about formatting.}
 
 \item{n.traits}{The number of traits in the \code{pheno} data frame or file; each trait should be contained in a separate column.}
 
-\item{delim}{The delimiter character in the pheno data file (if a filename is provided). For example,
+\item{ploidy}{The ploidy level e.g. 2, 4, 6, ..., etc.}
+
+\item{phased}{Logical. If TRUE, the input marker genotype data is assumed phased, with alleles coded as positive integers.
+The name of each individual/clone column is the id and haplotype, concatenated by \code{sep}.}
+
+\item{sep}{The haplotype concatenator; see \code{phased}.}
+
+\item{assume.inbred}{Logical. If TRUE, individuals/clones are assumed to be completely homozygous. Setting \code{phased = FALSE}
+\code{assume.inbred = FALSE} is useful for testing cross-validation, but you will not be able to predict genetic variances.
+This argument is ignored if \code{phased = TRUE}.}
+
+\item{max.ind.miss}{The maximum rate of missingness to retain an individual.}
+
+\item{max.mar.miss}{The maximum rate of missingness to retain an marker.}
+
+\item{min.mac}{The minimum minor allele count to retain a marker.}
+
+\item{max.r2}{The maximum squared correlation between any pair of markers. The \code{r^2} is used directly in
+filtering. For each pair of markers exceeding this threshold, the one with the greater minor allele frequency is
+retained. Set \code{max.r2 = 1} for no filtering.}
+
+\item{dominance}{Logical. Should a dominance relationship matrix be constructed?}
+
+\item{delim}{The delimiter character for the \code{geno} or \code{pheno} data files (if filenames are provided). For example,
 "," is for csv files, and "\t" is for tab-delimited files.}
 }
 \value{
-A variable of class \code{PopVar.data}
+A variable of class \code{\link[PopVar.data]{PopVar.data}}
 }
 \description{
-Combines marker genotype data and phenotype data into a single object for downstream
+Reads and combines marker genotype data and phenotype data into a single object for downstream
 analysis and processing.
 }
 \details{
-Genotypes in the \code{pheno} file or data frame that are not genotyped are removed from the analysis.
+The first columns of the file or \code{geno} data frame or file should be marker, chrom, cM (and optionally bp, if provided). Subsequent columns
+contain the allele dosage for individuals/clones/haplotypes, coded 0,1,2, ..., \code{ploidy}. While fractional
+values are allowed for genomewide prediction, these values are rounded when predicting the genetic variance within crosses.
+
+If unphased marker data is passed, the function will assume that all individuals are homozygous at all sites. Marker
+genotype doses will be rounded to meet that constraint.
+
+Missing allele dosage information is not permitted for downstream analysis. If there are missing allele dosages,
+the user will be prompted to run genotype imputation.
+
+The first column of the \code{pheno} data frame or file should be genotype ID, columns 2 through \code{n.traits + 1}
+are trait columns, and subsequent columns are fixed effects.
+
+Individuals/clones in the \code{pheno} file or data frame that are not genotyped are removed from the analysis.
+
+Only diploid allele dosages are allowed at this time.
+
+When \code{dominance=FALSE}, non-additive effects are not captured.
+If \code{dominance=TRUE}, a (digenic) dominance covariance matrix is used instead.
 }
 \examples{
-# Read in phased cranberry marker data
-geno_in <- read_geno(geno = cranberry_geno_phased, phased = TRUE, sep = "_hap", min.mac = 5)
+# Read in phased cranberry marker data and phenotypes
+geno <- cranberry_geno_phased
+pheno <- cranberry_pheno
+dat <- read_PopVar(geno = geno, pheno = pheno, n.traits = 6, phased = TRUE, sep = "_")
 
-# Create the PopVar.data object
-popvar_data <- read_PopVar(geno = geno_in, pheno = cranberry_pheno, n.traits = 6)
+# Read in unphased barley marker data and phenotypes; this will assume that all
+# individuals are completely homozygous
+geno <- barley_geno
+pheno <- barley_pheno
+dat <- read_PopVar(geno = geno, pheno = pheno, n.traits = 4, phased = FALSE, assume.inbred = TRUE)
 
+# Read in unphased cranberry marker data and phenotypes
+geno <- cranberry_geno
+pheno <- cranberry_pheno
+dat <- read_PopVar(geno = geno, pheno = pheno, n.traits = 6, phased = FALSE, assume.inbred = FALSE)
 
 }
