@@ -45,18 +45,12 @@ devtools::install_github("UMN-BarleyOatSilphium/PopVar")
 ```
 
 
-## Functions
+## Example datasets
 
-Below is a description of the functions provided in `PopVar`:
+Two datasets are provided with PopVar for demonstration purposes. 
 
-| Function        | Description                     |
-|:-----------------|:--------------------------------|
-| `pop.predict` | Uses simulations to make predictions in recombinant inbred line populations; can internally perform cross-validation for model selections; can be quite slow. |
-| `pop.predict2` | Uses deterministic equations to make predictions in populations of complete or partial selfing and with or without the induction of doubled haploids; is much faster than `pop.predict`; does not perform cross-validation or model selection internally. |
-| `pop_predict2` | Has the same functionality as `pop.predict2`, but accepts genomewide marker data in a simpler matrix format. |
-| `x.val` | Performs cross-validation to estimate model performance. |
-| `mppop.predict` | Uses deterministic equations to make predictions in 2- or 4-way populations of complete or partial selfing and with or without the induction of doubled haploids; does not perform cross-validation or model selection internally. |
-| `mpop_predict2` | Has the same functionality as `mppop.predict`, but accepts genomewide marker data in a simpler matrix format. |
+
+
 
 
 # Examples

@@ -11,6 +11,6 @@ S4 class of genotypic and phenotypic data with estimated marker effects
 \section{Slots}{
 
 \describe{
-\item{\code{marker.effects}}{A matrix of marker effects}
+\item{\code{marker.effects}}{A list of  marker effect arrays.}
 }}
 

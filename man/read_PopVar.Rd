@@ -12,11 +12,11 @@ read_PopVar(
   phased = FALSE,
   sep = ".",
   assume.inbred = FALSE,
+  dominance = FALSE,
   max.ind.miss = 0.5,
   max.mar.miss = 0.5,
   min.mac = 5,
   max.r2 = 1,
-  dominance = FALSE,
   delim = ","
 )
 }
@@ -40,6 +40,8 @@ The name of each individual/clone column is the id and haplotype, concatenated b
 \code{assume.inbred = FALSE} is useful for testing cross-validation, but you will not be able to predict genetic variances.
 This argument is ignored if \code{phased = TRUE}.}
 
+\item{dominance}{Logical. Should a dominance relationship matrix be constructed?}
+
 \item{max.ind.miss}{The maximum rate of missingness to retain an individual.}
 
 \item{max.mar.miss}{The maximum rate of missingness to retain an marker.}
@@ -49,8 +51,6 @@ This argument is ignored if \code{phased = TRUE}.}
 \item{max.r2}{The maximum squared correlation between any pair of markers. The \code{r^2} is used directly in
 filtering. For each pair of markers exceeding this threshold, the one with the greater minor allele frequency is
 retained. Set \code{max.r2 = 1} for no filtering.}
-
-\item{dominance}{Logical. Should a dominance relationship matrix be constructed?}
 
 \item{delim}{The delimiter character for the \code{geno} or \code{pheno} data files (if filenames are provided). For example,
 "," is for csv files, and "\t" is for tab-delimited files.}

@@ -72,19 +72,26 @@
 #' @export
 #' 
 read_PopVar <- function(geno, pheno, n.traits, ploidy = 2L, phased = FALSE, sep = ".", assume.inbred = FALSE, 
-                        max.ind.miss = 0.5, max.mar.miss = 0.5, min.mac = 5, max.r2 = 1, 
-                        dominance = FALSE, delim = ",") {
+                        dominance = FALSE, max.ind.miss = 0.5, max.mar.miss = 0.5, min.mac = 5, max.r2 = 1, 
+                        delim = ",") {
   
   # Error checking
   ploidy <- as.integer(ploidy)
   stopifnot(is.logical(phased))
   stopifnot(is.logical(dominance))
+  stopifnot(is.logical(assume.inbred))
   stopifnot(is.character(sep))
   stopifnot(is.numeric(n.traits))
   n.traits <- as.integer(n.traits)
   stopifnot(is.character(delim))
   
   if (ploidy > 2) stop("PopVar only supports diploids currently.")
+  
+  # Cannot have assume.inbred and dominance
+  if (assume.inbred & dominance) {
+    warning("'dominance' cannot be TRUE if 'assume.inbred' is also TRUE. Setting 'dominance' to FALSE...\n")
+    dominance <- FALSE
+  }
   
   # Check geno
   if (!is.data.frame(geno)) {
@@ -270,9 +277,15 @@ read_PopVar <- function(geno, pheno, n.traits, ploidy = 2L, phased = FALSE, sep 
     haplo_mat <- matrix(NA, nrow = 0, ncol = 0)
   }
   
+  
+  # Compute allele frequencies
+  p_j <- rowMeans(geno_mat) / 2
+  q_j <- 1 - p_j
+  
   # Create the PopVar.data object
-  output <- new(Class = "PopVar.data", ploidy = as.integer(ploidy), map = map, geno.mat = geno_mat, haplo.mat = haplo_mat, 
-                phased = phased, missing = missing, assume.inbred = assume.inbred, pheno = pheno2, fixed = fixed, traits = traits)
+  output <- new(Class = "PopVar.data", ploidy = as.integer(ploidy), map = map, geno.mat = geno_mat,
+                haplo.mat = haplo_mat, allele.freq = p_j, phased = phased, missing = missing, assume.inbred = assume.inbred,
+                dominance = dominance, pheno = pheno2, fixed = fixed, traits = traits)
   
   return(output)
   

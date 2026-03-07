@@ -15,7 +15,9 @@ S4 class of genotypic and phenotypic data
 
 \item{\code{map}}{A data frame of the genetic map information.}
 
-\item{\code{geno.mat}}{A matrix of marker genotypes.}
+\item{\code{geno.mat}}{A matrix of marker genotypes coded as allele dosages z = { 0, 1, 2 }}
+
+\item{\code{allele.freq}}{A numeric vector of allele frequencies of the first allele.}
 
 \item{\code{haplo.mat}}{A matrix of haplotypes.}
 
@@ -25,7 +27,7 @@ S4 class of genotypic and phenotypic data
 
 \item{\code{assume.inbred}}{Whether to assume unphased marker data comes from completely homozygous individuals.}
 
-\item{\code{geno}}{A \code{\link{PopVar.geno}} object.}
+\item{\code{dominance}}{Whether to compute dominance marker matrices and effects.}
 
 \item{\code{pheno}}{A data frame of phenotypic data}
 

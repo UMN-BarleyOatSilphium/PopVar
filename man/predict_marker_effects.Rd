@@ -36,12 +36,12 @@ The function currently supports the models:
 }
 \examples{
 # Read in unphased cranberry marker data and phenotypes
-geno <- cranberry_geno
+geno <- cranberry_geno_phased
 pheno <- cranberry_pheno
-dat <- read_PopVar(geno = geno, pheno = pheno, n.traits = 6, phased = FALSE, 
-                   assume.inbred = FALSE)
+dat <- read_PopVar(geno = geno, pheno = pheno, n.traits = 6, phased = TRUE, 
+                   assume.inbred = FALSE, dominance = TRUE, sep = "_")
 
 # Compute marker effects using the rrBLUP and RKHS models
-data_me <- predict_marker_effects(data = popvar_data, models = c("rrBLUP", "BRR"))
+data_me <- predict_marker_effects(data = dat, models = c("rrBLUP", "BRR"))
 
 }

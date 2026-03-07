@@ -6,18 +6,21 @@
 \usage{
 cross_validate(
   data,
-  models,
+  group = NULL,
+  models = c("rrBLUP", "BayesA", "BayesB", "BayesC", "BL", "BRR"),
   method = c("frac", "kfold", "loo"),
-  p.test,
-  k,
-  reps,
-  group
+  params = list(nIter = 500, burnIn = 50),
+  p.test = 0.3,
+  k = 5,
+  n.reps = 25
 )
 }
 \arguments{
 \item{data}{A \code{PopVar.data} object from \code{read_PopVar}.}
 
-\item{models}{The list of models to run. Currently supports ...}
+\item{group}{The name of a column in the phenotype data for grouped cross-validation (e.g. environment, location, etc.). For example to run leave-one-environment-out cross-validation, set \code{method = "loo"} and \code{group = "env"}.}
+
+\item{models}{The list of models to run. See Details for supported models.}
 
 \item{method}{The cross-validation method. Either fractional (\code{"frac"}), k-fold (\code{"kfold"}), or leave-one-out \code{"loo"}.}
 
@@ -25,10 +28,33 @@ cross_validate(
 
 \item{k}{For k-fold cross-validation, the number of folds.}
 
-\item{reps}{The number of complete replicates of fractional or k-fold cross-validation.}
-
-\item{group}{The name of a column in the phenotype data for grouped cross-validation (e.g. environment, location, etc.). For example to run leave-one-environment-out cross-validation, set \code{method = "loo"} and \code{group = "env"}.}
+\item{n.reps}{The number of complete replicates of fractional or k-fold cross-validation.}
+}
+\value{
+A list with a summary table and plot of cross-validation results.
 }
 \description{
 Estimate genomewide prediction accuracy using cross-validation
+}
+\details{
+The function currently supports the models:
+\describe{
+\item{rrBLUP}{Ridge regression best linear unbiased prediction.}
+\item{BayesA}{BayesA.}
+\item{BayesB}{BayesB.}
+\item{BayesC}{BayesC-pi.}
+\item{BL}{Bayesian Lasso.}
+\item{BRR}{Bayesian ridge regression.}
+}
+}
+\examples{
+# Read in unphased cranberry marker data and phenotypes
+geno <- cranberry_geno_phased
+pheno <- cranberry_pheno
+dat <- read_PopVar(geno = geno, pheno = pheno, n.traits = 6, phased = TRUE, 
+                   assume.inbred = FALSE, dominance = TRUE, sep = "_")
+
+# Run k-fold cross-validation using the rrBLUP and RKHS models
+cv_res <- cross_validate(data = dat, models = c("rrBLUP", "BRR"), method = "kfold", n.reps = 10)
+
 }

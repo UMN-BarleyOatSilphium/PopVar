@@ -12,6 +12,7 @@ The main attribute of 'PopVar' is the prediction of genetic variance in bi-paren
 Useful links:
 \itemize{
   \item \url{https://github.com/UMN-BarleyOatSilphium/PopVar}
+  \item \url{https://umn-barleyoatsilphium.github.io/PopVar/}
   \item Report bugs at \url{https://github.com/UMN-BarleyOatSilphium/PopVar/issues}
 }
 
