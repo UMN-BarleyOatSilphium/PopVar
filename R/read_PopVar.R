@@ -282,6 +282,7 @@ read_PopVar <- function(geno, pheno, n.traits, ploidy = 2L, phased = FALSE, sep 
   p_j <- rowMeans(geno_mat) / 2
   q_j <- 1 - p_j
   
+  
   # Create the PopVar.data object
   output <- new(Class = "PopVar.data", ploidy = as.integer(ploidy), map = map, geno.mat = geno_mat,
                 haplo.mat = haplo_mat, allele.freq = p_j, phased = phased, missing = missing, assume.inbred = assume.inbred,

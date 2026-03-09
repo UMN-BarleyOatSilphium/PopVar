@@ -56,7 +56,7 @@ predict_marker_effects <- function(data, models = c("rrBLUP", "BayesA", "BayesB"
   # Create an array of m x p x r dimensions, where m = number of markers, p is number of traits, and r is number of models
   add_marker_effects <- array(data = 0, dim = c(nrow(geno), length(traits), length(models)),
                               dimnames = list(rownames(geno), traits, models))
-  dom_marker_effects <- add_marker_effects
+  allele_sub_effects <- dom_deviation_effects <- dom_marker_effects <- add_marker_effects
   
   # User message
   cat(paste("\nMarker effects will be predicted using the following models:\n",paste(models, collapse="\n"),"\n",sep=""))
@@ -77,12 +77,15 @@ predict_marker_effects <- function(data, models = c("rrBLUP", "BayesA", "BayesB"
     mf <- model.frame(formula = reformulate("geno_id", trt), data = pheno)
     y <- model.response(mf)
     X <- model.matrix(~ 1, mf)
-    # M must be -1, 0, 1
-    M <- t(geno[, mf$geno_id, drop = FALSE] - 1)
+    # M for mmes and BGLR must be -1, 0, 1
+    # M <- t(geno[, mf$geno_id, drop = FALSE] - 1)
+    # Or should it be 0, 1, 2?
+    M <- t(geno[, mf$geno_id, drop = FALSE])
     
     # Center the matrices
     p_j <- data@allele.freq
-    M1 <- M - matrix(2 * p_j, nrow = nrow(M), ncol = ncol(M), byrow = TRUE)
+    Z <- M - matrix(2 * p_j, nrow = nrow(M), ncol = ncol(M), byrow = TRUE)
+    M1 <- (M - 1) - matrix(2 * p_j, nrow = nrow(M), ncol = ncol(M), byrow = TRUE)
     
     if (data@dominance) {
       # Create a dominance matrix
@@ -100,32 +103,71 @@ predict_marker_effects <- function(data, models = c("rrBLUP", "BayesA", "BayesB"
     if ("rrBLUP" %in% models) {
       # Single variance component if no dominance
       if (!data@dominance) {
-        ans <- mixed.solve(y = y, Z = M1, X = X, method = "REML")
+        ans <- mixed.solve(y = y, Z = Z, X = X, method = "REML")
         # ans1 <- mixed.solve(y = y, Z = M, X = X, method = "REML")
         # Store
         add_marker_effects[names(ans$u), trt, "rrBLUP"] <- unname(ans$u)
+        allele_sub_effects[names(ans$u), trt, "rrBLUP"] <- unname(ans$u)
         
       } else {
         mf1 <- mf
         # Add directional dominance effect
         mf1$f <- rowMeans(M != 0)
+        X1 <- model.matrix(~ 1 + f, mf1)
         
-        # ans <- mmes(fixed = reformulate(termlabels = c("1", "f"), response = trt),
-        #             random = ~ vsm(ism(M1)) + vsm(ism(R1)), data = mf1, verbose = FALSE, dateWarning = FALSE)
+        
+        # #### TEST ###
+        # Ztest <- Z[,data@map$marker[data@map$chrom == "chr01"]]
+        # R1test <- R1[,data@map$marker[data@map$chrom == "chr01"]]
         # 
-        # # Store
-        # add_marker_effects[row.names(ans$uList[1,1][[1]]), trt, "rrBLUP"] <- as.vector(ans$uList[1,1][[1]])
-        # dom_marker_effects[row.names(ans$uList[2,1][[1]]), trt, "rrBLUP"] <- as.vector(ans$uList[2,1][[1]])
+        # # SOMMER for direct marker effects
+        # ans_a <- mmes(fixed = reformulate(termlabels = c("1", "f"), response = trt),
+        #               random = ~ vsm(ism(Ztest)) + vsm(ism(R1test)), data = mf1, verbose = FALSE, dateWarning = FALSE)
+        #             
         # 
+        # # EMMREML
+        # ans_b <- emmremlMultiKernel(y = y, X = X1, Zlist = list(a = Ztest, d = R1test), Klist = list(a = diag(ncol(Ztest)), d = diag(ncol(Ztest))))
+        # 
+        # # Compare
+        # plot(ans_a$uList[[1]], ans_b$uhat[seq(1, ncol(Ztest))]); abline(a = 0, b = 1)
+        # plot(ans_a$uList[[2]], ans_b$uhat[seq(ncol(Ztest) + 1, (ncol(Ztest) * 2))]); abline(a = 0, b = 1)
+        # 
+        # 
+        # # Alternative parameterization
+        # mf1$geno_id <- as.character(mf1$geno_id)
+        # mf1$geno_id <- factor(mf1$geno_id, levels = mf1$geno_id)
+        # mf1$geno_id1 <- mf1$geno_id
+        # 
+        # 
+        # MMT <- tcrossprod(Ztest)
+        # MMTinv <- solve(MMT)
+        # MMTinv <- t(Ztest) %*% MMTinv
+        # 
+        # RRT <- tcrossprod(R1test)
+        # RRTinv <- solve(RRT)
+        # RRTinv <- t(R1test) %*% RRTinv
+        # 
+        # ans1 <- mmes(fixed = reformulate(termlabels = c("1", "f"), response = trt),
+        #              random = ~ vsm(ism(geno_id), Gu = MMT) + vsm(ism(geno_id1), Gu = RRT),
+        #              data = mf1, verbose = FALSE, dateWarning = FALSE)
+        # 
+        # # Compare
+        # add.me.part <- MMTinv %*% as.matrix(ans1$uList$`vsm(ism(geno_id), Gu = MMT`)
+        # dom.me.part <- RRTinv %*% as.matrix(ans1$uList$`vsm(ism(geno_id1), Gu = RRT`)
+        # 
+        # plot(ans_a$uList[[1]], add.me.part); abline(a = 0, b = 1)
+        # plot(ans_a$uList[[2]], dom.me.part); abline(a = 0, b = 1)
+        
+        ##### End test ### 
         
         # Alternative parameterization
         mf1$geno_id <- as.character(mf1$geno_id)
         mf1$geno_id <- factor(mf1$geno_id, levels = mf1$geno_id)
         mf1$geno_id1 <- mf1$geno_id
         
-        MMT <- tcrossprod(M1)
+        MMT <- tcrossprod(Z)
         MMTinv <- solve(MMT)
-        MMTinv <- t(M1) %*% MMTinv
+        MMTinv <- t(Z) %*% MMTinv
         
         RRT <- tcrossprod(R1)
         RRTinv <- solve(RRT)
@@ -152,19 +194,48 @@ predict_marker_effects <- function(data, models = c("rrBLUP", "BayesA", "BayesB"
           dom.me.part <- RRTinv %*% as.matrix(ans1$uList$`vsm(ism(geno_id1), Gu = RRT`)
           
         }
-        
-
-        
-        # # compare marker effects between both models
-        # plot(add.me.part, ans$uList$`vsm(ism(M1`)
-        # plot(dom.me.part, ans$uList$`vsm(ism(R1`)
-        # 
 
         # Store
         add_marker_effects[row.names(add.me.part), trt, "rrBLUP"] <- as.vector(add.me.part)
         dom_marker_effects[row.names(dom.me.part), trt, "rrBLUP"] <- as.vector(dom.me.part)
         
+        ## Convert marker effects a and d to substitution effects and dominance deviations
+        # Get the regression coefficient on percent homozygosity
+        f_coef <- ans1$b[2,1]
+        # Convert dom effects to dom deviations
+        dom_dev <- as.vector(dom.me.part) - (f_coef / length(dom.me.part))
+        # Compute substitution effects
+        allele_sub <- as.vector(add.me.part) + (dom_dev * (q_j - p_j))
+        
+        # Add these to the matrices
+        allele_sub_effects[row.names(add.me.part), trt, "rrBLUP"] <- unname(allele_sub)
+        dom_deviation_effects[row.names(add.me.part), trt, "rrBLUP"] <- dom_dev
+        
+        # # Verify
+        # R2 <- apply(X = M, MARGIN = 1, FUN = function(ind) {
+        #   ind[ind == 1] <- 2 * (p_j[ind == 1] * q_j[ind == 1])
+        #   ind[ind == 2] <- -2 * (q_j[ind == 2]^2)
+        #   ind[ind == 0] <- -2 * (p_j[ind == 0]^2)
+        #   ind
+        # })
+        # R2 <- t(R2)
+        # RRT2 <- tcrossprod(R2)
+        # RRT2inv <- solve(RRT2)
+        # RRT2inv <- t(R2) %*% RRT2inv
+        # ans2 <- mmes(fixed = reformulate(termlabels = c("1"), response = trt),
+        #              random = ~ vsm(ism(geno_id), Gu = MMT) + vsm(ism(geno_id1), Gu = RRT2),
+        #              data = mf1, verbose = FALSE, dateWarning = FALSE)
+        # a_est <- MMTinv %*% as.matrix(ans2$uList$`vsm(ism(geno_id), Gu = MMT`)
+        # # Compare allele effects from model 1 and model 2
+        # plot(a_est[,1], add.me.part[,1]); abline(a = 0, b = 1)
+        # # Compare allele effects from model 1 with recomputed allele substitution effects
+        # plot(a_est[,1], allele_sub); abline(a = 0, b = 1)
+        # 
+        # plot(as.vector(add.me.part), unname(ans$u))
+        
       }
+      
+ 
       
     }
     
@@ -181,12 +252,14 @@ predict_marker_effects <- function(data, models = c("rrBLUP", "BayesA", "BayesB"
           # Fit
           ETA <- list(
             list(X = X, model = "FIXED"),
-            list(X = M1, model = mod)
+            list(X = Z, model = mod)
           )
           ans <- BGLR(y = y, response_type = "gaussian", ETA = ETA, nIter = params$nIter, burnIn = params$burnIn, 
                       saveAt = "tmp/temp", verbose = FALSE)
           
           add_marker_effects[names(ans$ETA[[2]]$b), trt, mod] <- unname(ans$ETA[[2]]$b)
+          allele_sub_effects[names(ans$ETA[[2]]$b), trt, mod] <- unname(ans$ETA[[2]]$b)
+          
           
         } else {
           
@@ -194,15 +267,29 @@ predict_marker_effects <- function(data, models = c("rrBLUP", "BayesA", "BayesB"
           
           # Fit
           ETA <- list(
-            list(X = X1, model = "FIXED"),
-            list(X = M1, model = mod),
-            list(X = R1, model = mod)
+            fixed = list(X = X1, model = "FIXED"),
+            add = list(X = Z, model = mod),
+            dom = list(X = R1, model = mod)
           )
           ans <- BGLR(y = y, response_type = "gaussian", ETA = ETA, nIter = params$nIter, burnIn = params$burnIn, 
                       saveAt = "tmp/temp", verbose = FALSE)
           
           add_marker_effects[names(ans$ETA[[2]]$b), trt, mod] <- unname(ans$ETA[[2]]$b)
           dom_marker_effects[names(ans$ETA[[3]]$b), trt, mod] <- unname(ans$ETA[[3]]$b)
+          
+          
+          ## Convert marker effects a and d to substitution effects and dominance deviations
+          # Get the regression coefficient on percent homozygosity
+          f_coef <- ans$ETA$fixed$b[2]
+          p <- length(unname(ans$ETA[[3]]$b))
+          # Convert dom effects to dom deviations
+          dom_dev <- unname(ans$ETA[[3]]$b) - (f_coef / p)
+          # Compute substitution effects
+          allele_sub <- unname(ans$ETA[[2]]$b) + (dom_dev * (q_j - p_j))
+          
+          # Add these to the matrices
+          allele_sub_effects[names(ans$ETA[[2]]$b), trt, mod]  <- unname(allele_sub)
+          dom_deviation_effects[names(ans$ETA[[3]]$b), trt, mod]  <- dom_dev
           
         }
         
@@ -217,7 +304,8 @@ predict_marker_effects <- function(data, models = c("rrBLUP", "BayesA", "BayesB"
   # Remove the temporary file directory
   unlink(x = "tmp/", recursive = TRUE, force = TRUE)
 
-  marker_effects <- list(add.marker.effects = add_marker_effects, dom.marker.effects = dom_marker_effects)
+  marker_effects <- list(add.marker.effects = add_marker_effects, dom.marker.effects = dom_marker_effects, 
+                         allele.sub.effects = allele_sub_effects, dom.dev.effects = dom_deviation_effects)
   
   output <- new(Class = "PopVar.me", ploidy = data@ploidy, map = data@map, geno.mat = data@geno.mat,  
                 haplo.mat = data@haplo.mat, allele.freq = data@allele.freq, phased = data@phased, missing = data@missing, 
